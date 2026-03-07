@@ -6,31 +6,34 @@ import cardData from '../data/card-pool.json';
 import { LocalCard } from '../global-types/card';
 import { PHASES } from '../game/phases';
 
+// Planning in plan.md
+
 const cardPool = cardData as LocalCard[];
+const hand = cardPool.slice(0, 5); // test example hand
 
 const StoryMakingBoard = ({ moves }: any) => {
-  const hand = cardPool.slice(0, 5);
-
   return (
     <div>
       <h2>Story Making Phase</h2>
       <Hand
         cards={hand}
-        getAction={(_card) => () => moves.drawCard()}
+        onCardSelect={(card: LocalCard, text: string) => { // called by Hand.tsx when card is selected
+          moves.setCardText(card.id, text);
+        }}
       />
-    </div>
+    </div >
   );
 };
 
 const PresentingBoard = ({ moves }: any) => {
-  const hand = cardPool.slice(0, 5);
-
   return (
     <div>
       <h2>Presenting Phase</h2>
       <Hand
         cards={hand}
-        getAction={(card) => () => moves.playCard(card.id)}
+        onCardSelect={(card: LocalCard) => {
+          // todo
+        }}
       />
     </div>
   );

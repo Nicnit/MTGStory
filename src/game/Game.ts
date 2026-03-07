@@ -1,20 +1,35 @@
 import type { Game } from 'boardgame.io';
 import { getRandomCard } from '../data/card-data';
 
+type PlayerState = {
+  secretCards: string[];
+  cardTexts: Record<string, string>;
+}
+
 export const StoryGame: Game = {
   setup: () => ({
-    deck: [] as string[], // TODO work on layout: arrays of arrays of boardstates for each player?
-    hand: [] as string[], // string if IDs of cards
-    board: [] as string[],
+    sharedBoard: [],
+    players: {
+      '0': { secretCards: [], cardTexts: {} },
+      '1': { secretCards: [], cardTexts: {} },
+      '2': { secretCards: [], cardTexts: {} },
+      '3': { secretCards: [], cardTexts: {} },
+    } as Record<string, PlayerState>
   }),
+
   phases: {
     storymaking: {
       start: true,
       moves: {
-        drawCard: ({ G }) => {
-          const card = getRandomCard();
-          G.hand.push(card.id);
+        drawCard: () => {
+          getRandomCard();
         },
+        setCardText: ({ G, playerID }, cardId: string, text: string) => {
+          if (playerID && G.players[playerID]) {
+            G.players[playerID].cardTexts[cardId] = text;
+          }
+        },
+        playCard: () => { }
       },
     },
     presenting: {

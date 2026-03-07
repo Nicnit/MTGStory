@@ -51,3 +51,41 @@ h2 {
   text-align: center;
   margin-bottom: 24px;
 }
+
+.card-input {
+  width: 200px;
+  padding: 12px;
+  background: #16213e;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-input p {
+  font-size: 14px;
+  margin: 0;
+}
+
+.card-input input {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: #0f0f23;
+  color: #eee;
+  font-size: 14px;
+}
+
+.card-input button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: #4a4a8a;
+  color: #eee;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.card-input button:hover {
+  background: #5a5a9a;
+}
