@@ -1,28 +1,43 @@
-Plan:
+Techstack:
+Vite
+React
+boardgame.io
+DnD-kit
 
-Story phase:
-- Auto draw random hand
-- Actions:
-  - Select card
-    - Assign text to it
-  - Drag/Drop card into pre-existing container (signifying order of story)
-    - Can add new containers to lengthen the story / refer back to cards?
-  - Submit the story
-    - Each card from the hand must have been used for the story.
-      - Necessarily requires all HAND_SIZE containers be filled , with unique cards.
+MTG game where players play in a lobby, making a story out of MTG cards assigned to them, and presenting that story and then voting on the best story.
+
+---
+storymaking phase:
+- [x] assign text to cards
+- [ ] players can assign text at any time on the dnd-kit cards
+- [ ] Drag around cards in hand to rearrange visual order
+
+presenting phase:
+- [ ] locked to active player
+- [ ] clear board for presentation player
+- [ ] others cant see cards until they are on board
+- [ ] drag/drop card onto board, singaling played
+- [ ] text graphics on card being dropped on board
+    etb animation/graphic
+    text appears near the card on  board
+    cards on board can be dragged and moved, with their text being moved as well.
+- [ ] other players can vote at end
+
+closing phase:
+compare scores and declare winner
+good grahics
+- [ ] winner's cards get autoplayed from left to right on board with animations.
+- [ ] new game or close lobby option.
+
+How Click vs Drag Works 
+- dnd-kit has default activationConstraint: { distance: 10 }
+- If pointer moves < Xpx -> onClick fires
+- If pointer moves >= Xpx -> drag handles reorder
 
 
-Separation of concerns:
-App.tsx with the differen boards handles logc
-Hand it dumb
+---
+Low concern potential TODOs and considerations
 
-
-
-1. Game.ts - Added PlayerState type with cardTexts field and setCardText move to store card text in game state
-2. App.tsx - Fixed JSX syntax and changed Hand to use onCardSelect prop that calls moves.setCardText(card.id, text)
-3. Hand.tsx - Rewrote to:
-   - Track selectedCard state
-   - Show inline text input beside cards when a card is clicked
-   - Submit text to game state on button click or Enter key
-4. index.css - Added .card-input styling for the inline input UI
-The input appears beside the cards when clicked, and after submitting, it closes and keeps the card in hand.
+- Allow playing the card in storymaking onto a secret board for planning?
+- Allow filters by sets, year, UB, whatever scryfall offers really.
+- Allow reusing same cards in presenting + multiple text boxes in storymaking phase
