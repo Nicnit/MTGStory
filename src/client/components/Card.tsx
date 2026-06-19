@@ -10,7 +10,6 @@ interface CardProps {
 }
 
 function Card({ id, name, image, onClick }: CardProps) {
-  // 
   const { attributes, listeners, setNodeRef, transform } = useSortable({
     id: id,
   })

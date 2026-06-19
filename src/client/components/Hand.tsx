@@ -6,11 +6,16 @@ import { UICard } from '../App';
 
 interface HandProps {
   cards: UICard[];
-  onCardSelect: (card: LocalCard, text: string) => void;
+  onCardSubmit: (card: LocalCard, text: string) => void;
   cardTexts: Record<string, string>; // Mapping from PlayerState.cardTests
 }
-
-function Hand({ cards, onCardSelect, cardTexts }: HandProps) {
+/**
+  * Handles cards in the hand.
+  *
+  * @param cards - 
+  * @param onCardSubmit - function to run when submitting 
+  */
+function Hand({ cards, onCardSubmit, cardTexts }: HandProps) {
   const [selectedCard, setSelectedCard] = useState<LocalCard | null>(null);
   const [inputText, setInputText] = useState('');
 
@@ -26,7 +31,7 @@ function Hand({ cards, onCardSelect, cardTexts }: HandProps) {
 
   const handleSubmit = () => {
     if (selectedCard && inputText.trim()) {
-      onCardSelect(selectedCard, inputText);
+      onCardSubmit(selectedCard, inputText);
       // Reset the temporary values
       setSelectedCard(null);
       setInputText('');

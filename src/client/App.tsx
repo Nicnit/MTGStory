@@ -18,11 +18,20 @@ const DRAG_DISTANCE_MIN = 5;
 
 const cardPool = cardData as LocalCard[];
 
+/*
+  * A card that will show in the UI via hand or board.
+  */
 export interface UICard extends LocalCard {
   instanceID: string;
 }
 
-// Adaption layer between GameState { instanceID, scryfallID } and LocalCard from Scryfall
+/**
+  * Adaption layer between GameState { instanceID, scryfallID } and LocalCard from Scryfall
+  *
+  * @param gamestate - gamestate
+  * @param playerID - player who's hand to update
+  * @return 
+  */
 function getHandFromGameState(G: GameState, playerID: string | null): UICard[] {
   if (!playerID || !G.players[playerID]) {
     return [];
@@ -59,7 +68,7 @@ const StoryMakingBoard = ({ G, playerID, moves }: any) => {
       <pre>{JSON.stringify(G, null, 2)}</pre>
       <Hand
         cards={hand}
-        onCardSelect={(card: LocalCard, text: string) => {
+        onCardSubmit={(card: LocalCard, text: string) => {
           moves.setCardText(card.id, text);
         }}
         cardTexts={G.players[playerID]?.cardTexts || {}}

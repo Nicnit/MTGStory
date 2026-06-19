@@ -4,17 +4,18 @@ import { getRandomCard } from '../data/card-data';
 const INITIAL_HAND_SIZE = 7;
 
 interface CardInstance {
-  instanceID: string; // Differentite between instances of the same card
+  instanceID: string; // Differentite between instances of the same card. Doesn't depend on scryfallID.
   scryfallID: string;
 }
 
-export interface SecretHand {
+export interface SecretHand { // TODO combine cardText as ? into cards array
   cards: CardInstance[];
+  cardTexts: string[];
 }
 
 type PlayerState = {
   secretHand: SecretHand;
-  cardTexts: Record<string, string>; // ID to text
+  // cardTexts: Record<string, string>; // ID to text
 }
 
 export type GameState = {
@@ -68,10 +69,14 @@ export const StoryGame: Game<GameState> = {
       start: true,
       turn: {
         activePlayers: { all: 'ANY' },
-
       },
       // endIf condition is met
       moves: {
+        /**
+         * Draws a number of random cards
+         * @param state - gamestate and playerID of who to draw cards
+         * @returns updates state's next card ID and player's hand 
+         */
         drawCard: ({ G, playerID }) => {
           // getRandomCard();
           if (playerID && G.players[playerID]) {
@@ -80,11 +85,21 @@ export const StoryGame: Game<GameState> = {
             G.nextCardID = nextID;
           }
         },
+        /**
+        * Sets the player's story text for a card in their hand.
+        * @param state - game state and player ID
+        * @param cardID - cardID's text to be changed
+        * @param text - text to set to
+        * @returns null, immutably changes the player's hand.
+        */
         setCardText: ({ G, playerID }, cardID: string, text: string) => {
           if (playerID && G.players[playerID]) {
             G.players[playerID].cardTexts[cardID] = text; // Immer makes this immutable
           }
         },
+        /*
+         * Play a card on the board for all to see, with its story text
+        */
         playCard: () => {
           return; // Allow playing the card on secret board for planning?
         }
