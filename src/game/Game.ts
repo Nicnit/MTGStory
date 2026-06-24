@@ -6,16 +6,16 @@ const INITIAL_HAND_SIZE = 7;
 interface CardInstance {
   instanceID: string; // Differentite between instances of the same card. Doesn't depend on scryfallID.
   scryfallID: string;
+  cardText: string;
 }
 
 export interface SecretHand { // TODO combine cardText as ? into cards array
   cards: CardInstance[];
-  cardTexts: string[];
 }
 
 type PlayerState = {
   secretHand: SecretHand;
-  // cardTexts: Record<string, string>; // ID to text
+  // Other player stats 
 }
 
 export type GameState = {
@@ -33,7 +33,8 @@ function drawCards(hand: SecretHand, numCards: number, startID: number): { retHa
   for (let i = 0; i < numCards; i++) {
     cards.push({
       instanceID: makeCardInstanceID(startID++),
-      scryfallID: getRandomCard().id
+      scryfallID: getRandomCard().id,
+      cardText: ""
     })
   }
   return ({
@@ -53,7 +54,6 @@ export const StoryGame: Game<GameState> = {
 
       players[i.toString()] = {
         secretHand: retHand,
-        cardTexts: {}
       }
     }
     return {
@@ -94,7 +94,14 @@ export const StoryGame: Game<GameState> = {
         */
         setCardText: ({ G, playerID }, cardID: string, text: string) => {
           if (playerID && G.players[playerID]) {
-            G.players[playerID].cardTexts[cardID] = text; // Immer makes this immutable
+            const cards = G.players[playerID].secretHand.cards;
+
+            for (const card of cards) {
+              if (card.instanceID == cardID) {
+                card.cardText = text;
+                break;
+              }
+            }
           }
         },
         /*
