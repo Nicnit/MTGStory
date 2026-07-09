@@ -18,31 +18,10 @@ import {
 const DRAG_DISTANCE_MIN = 5;
 
 const cardPool = cardData as LocalCard[];
-/**
-  * Adaption layer between GameState { instanceID, scryfallID } and LocalCard from Scryfall
-  *
-  * @param gamestate - gamestate
-  * @param playerID - player who's hand to update
-  * @return 
-  */
-function getHandFromGameState(G: GameState, playerID: string | null): UICard[] {
-  if (!playerID || !G.players[playerID]) {
-    return [];
-  }
 
-  const cardsInstances = G.players[playerID].secretHand.cards;
-  // Return the cards as UICards given teh data from the hand.
-  return cardsInstances.map(
-    cardInstance => {
-      const localCards = cardPool.find(localCard => localCard.id === cardInstance.scryfallID)
-      if (!localCards) return null;
-      return {
-        ...localCards,
-        instanceID: cardInstance.instanceID
-      };
-    }
-  ).filter(Boolean) as UICard[];
-}
+
+// Boards
+
 
 const StoryMakingBoard = ({ G, playerID, moves }: any) => {
   const hand = getHandFromGameState(G, playerID);
@@ -70,14 +49,21 @@ const StoryMakingBoard = ({ G, playerID, moves }: any) => {
   );
 };
 
-const PresentingBoard = ({ G, playerID }: any) => {
+
+/**
+ * Handles while presenting.
+ *  - Hand hidden while not your turn
+ *  - Shows global board
+ */
+const PresentingBoard = ({ G, playerID, moves }: any) => {
   const hand = getHandFromGameState(G, playerID);
   return (
     <div>
       <h2>Presenting Phase</h2>
       <Hand
         cards={hand}
-        onCardSelect={(_card: LocalCard) => {
+        onCardSubmit={(card: LocalCard, text: string) => {
+          // no moves eyet implemented
         }}
         cardTexts={G.players[playerID]?.cardTexts || {}}
       />
@@ -85,12 +71,20 @@ const PresentingBoard = ({ G, playerID }: any) => {
   );
 };
 
+
+/**
+ * Handles switching between boards
+ */
 const DynamicBoard = (props: any) => {
   if (props.ctx.phase === PHASES.PRESENTING) {
     return <PresentingBoard {...props} />;
   }
   return <StoryMakingBoard {...props} />;
 };
+
+
+// Running
+
 
 const App = Client({
   game: StoryGame,
@@ -99,3 +93,33 @@ const App = Client({
 });
 
 export default App;
+
+
+
+// Other Helpers
+
+/**
+  * Adaption layer between GameState { instanceID, scryfallID } and LocalCard from Scryfall
+  *
+  * @param gamestate - gamestate
+  * @param playerID - player who's hand to update
+  * @return 
+  */
+function getHandFromGameState(G: GameState, playerID: string | null): UICard[] {
+  if (!playerID || !G.players[playerID]) {
+    return [];
+  }
+
+  const cardsInstances = G.players[playerID].secretHand.cards;
+  // Return the cards as UICards given teh data from the hand.
+  return cardsInstances.map(
+    cardInstance => {
+      const localCards = cardPool.find(localCard => localCard.id === cardInstance.scryfallID)
+      if (!localCards) return null;
+      return {
+        ...localCards,
+        instanceID: cardInstance.instanceID
+      };
+    }
+  ).filter(Boolean) as UICard[];
+}

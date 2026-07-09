@@ -1,14 +1,12 @@
 import type { Game } from 'boardgame.io';
 import { getRandomCard } from '../data/card-data';
+import { CardInstance } from '@/global-types/card';
 
 const INITIAL_HAND_SIZE = 7;
 
-interface CardInstance {
-  instanceID: string; // Differentite between instances of the same card. Doesn't depend on scryfallID.
-  scryfallID: string;
-  cardText: string;
-}
-
+/**
+ * used in Game.ts to track hands of players that others can't see.
+ */
 export interface SecretHand { // TODO combine cardText as ? into cards array
   cards: CardInstance[];
 }

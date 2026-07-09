@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Card from './Card';
 import { LocalCard } from '../../global-types/card';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
-import { UICard } from '../App';
+import { UICard } from '../../global-types/card';
 
 interface HandProps {
   cards: UICard[];
@@ -10,10 +10,10 @@ interface HandProps {
   cardTexts: Record<string, string>; // Mapping from PlayerState.cardTests
 }
 /**
-  * Handles cards in the hand.
+  * Handles cards in the hand and editing of their text
   *
   * @param cards - 
-  * @param onCardSubmit - function to run when submitting 
+  * @param onCardSubmit - function to run when submitting card with text
   */
 function Hand({ cards, onCardSubmit, cardTexts }: HandProps) {
   const [selectedCard, setSelectedCard] = useState<LocalCard | null>(null);
