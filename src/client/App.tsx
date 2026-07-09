@@ -1,6 +1,7 @@
 import { Client } from 'boardgame.io/react';
 import { StoryGame } from '../game/Game';
 import { Local } from 'boardgame.io/multiplayer';
+import { UICard } from '../global-types/card.ts'
 import Hand from './components/Hand';
 import cardData from '../data/card-pool.json';
 import { LocalCard } from '../global-types/card';
@@ -17,14 +18,6 @@ import {
 const DRAG_DISTANCE_MIN = 5;
 
 const cardPool = cardData as LocalCard[];
-
-/*
-  * A card that will show in the UI via hand or board.
-  */
-export interface UICard extends LocalCard {
-  instanceID: string;
-}
-
 /**
   * Adaption layer between GameState { instanceID, scryfallID } and LocalCard from Scryfall
   *

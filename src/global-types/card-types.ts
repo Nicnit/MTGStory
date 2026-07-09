@@ -6,6 +6,7 @@ export enum CardType {
   ARTIFACT = 'Artifact',
   PLANESWALKER = 'Planeswalker',
   LAND = 'Land',
+  NONE = 'NOTYPE' // shouldn't match anything. symbolic
 }
 
 // Just for iterating in process-cards.ts
@@ -17,4 +18,5 @@ export const CARD_TYPES = [
   CardType.ARTIFACT,
   CardType.PLANESWALKER,
   CardType.LAND,
+  CardType.NONE,
 ] as const;
