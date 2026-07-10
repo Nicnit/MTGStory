@@ -23,8 +23,8 @@ const cardPool = cardData as LocalCard[];
 // Boards
 
 
-const StoryMakingBoard = ({ G, playerID, moves }: any) => {
-  const hand = getHandFromGameState(G, playerID);
+const GlobalBoard = ({ G, playerID, moves }: any) => {
+  const handCards = getHandFromGameState(G, playerID);
   // Dnd-kit sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -35,66 +35,35 @@ const StoryMakingBoard = ({ G, playerID, moves }: any) => {
   )
 
   return (
+    // TODO choose which html to show here based on current phase
     <div>
-      <h2>Story Making Phase</h2>
+      <h2>Upkeep Phase</h2>
       <pre>{JSON.stringify(G, null, 2)}</pre>
       <Hand
-        cards={hand}
-        onCardSubmit={(card: LocalCard, text: string) => {
-          moves.setCardText(card.id, text);
-        }}
-        cardTexts={G.players[playerID]?.cardTexts || {}}
+        cards={handCards}
       />
     </div >
   );
 };
 
-
 /**
- * Handles while presenting.
- *  - Hand hidden while not your turn
- *  - Shows global board
- */
-const PresentingBoard = ({ G, playerID, moves }: any) => {
-  const hand = getHandFromGameState(G, playerID);
-  return (
-    <div>
-      <h2>Presenting Phase</h2>
-      <Hand
-        cards={hand}
-        onCardSubmit={(card: LocalCard, text: string) => {
-          // no moves eyet implemented
-        }}
-        cardTexts={G.players[playerID]?.cardTexts || {}}
-      />
-    </div>
-  );
-};
-
-
-/**
- * Handles switching between boards
+ * Handles switching between boards (if there are any to switch between)
  */
 const DynamicBoard = (props: any) => {
-  if (props.ctx.phase === PHASES.PRESENTING) {
-    return <PresentingBoard {...props} />;
-  }
-  return <StoryMakingBoard {...props} />;
+  // if (props.ctx.phase === PHASES.MAIN) {
+  //   return <PresentingBoard {...props} />;
+  // }
+  return <GlobalBoard{...props} />;
 };
 
-
 // Running
-
-
 const App = Client({
   game: StoryGame,
   board: DynamicBoard,
-  multiplayer: Local(),
+  multiplayer: Local(), // TODO change off Local towards end of development
 });
 
 export default App;
-
-
 
 // Other Helpers
 

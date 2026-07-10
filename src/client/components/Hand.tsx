@@ -6,43 +6,25 @@ import { UICard } from '../../global-types/card';
 
 interface HandProps {
   cards: UICard[];
-  onCardSubmit: (card: LocalCard, text: string) => void;
-  cardTexts: Record<string, string>; // Mapping from PlayerState.cardTests
 }
 /**
   * Handles cards in the hand and editing of their text
   *
   * @param cards - 
-  * @param onCardSubmit - function to run when submitting card with text
   */
-function Hand({ cards, onCardSubmit, cardTexts }: HandProps) {
+function Hand({ cards }: HandProps) {
   const [selectedCard, setSelectedCard] = useState<LocalCard | null>(null);
-  const [inputText, setInputText] = useState('');
 
   const handleCardClick = (card: LocalCard) => {
     if (selectedCard?.id === card.id) { // Deselects the card
       setSelectedCard(null);
-      setInputText('');
     } else {
       setSelectedCard(card);
-      setInputText(cardTexts[card.id] || '');
     }
   };
 
-  const handleSubmit = () => {
-    if (selectedCard && inputText.trim()) {
-      onCardSubmit(selectedCard, inputText);
-      // Reset the temporary values
-      setSelectedCard(null);
-      setInputText('');
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSubmit();
-    }
-  };
+  // TODO make cards in hand draggable, reorderable by dragging.
+  // TODO make cards in hand drop on baord when draged enough
 
   return (
     <SortableContext
@@ -58,20 +40,6 @@ function Hand({ cards, onCardSubmit, cardTexts }: HandProps) {
             onClick={() => handleCardClick(card)}
           />
         ))}
-        {selectedCard && (
-          <div className="card-input">
-            <p>Write your story element for: {selectedCard.name}</p>
-            <input
-              type="text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Enter story text..."
-              autoFocus
-            />
-            <button onClick={handleSubmit}>Submit</button>
-          </div>
-        )}
       </div>
     </SortableContext>
   );

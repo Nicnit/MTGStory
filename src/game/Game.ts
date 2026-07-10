@@ -13,7 +13,8 @@ export interface SecretHand { // TODO combine cardText as ? into cards array
 
 type PlayerState = {
   secretHand: SecretHand;
-  // Other player stats 
+  turnsTaken: number;
+  // Other player stats
 }
 
 export type GameState = {
@@ -26,13 +27,13 @@ function makeCardInstanceID(instanceID: number): string {
   return (`card-${instanceID}`)
 }
 
-function drawCards(hand: SecretHand, numCards: number, startID: number): { retHand: SecretHand, nextID: number } {
+function drawCards(hand: SecretHand, numCards: number, startID: number, playerID: string): { retHand: SecretHand, nextID: number } {
   const cards: CardInstance[] = [...hand.cards];
   for (let i = 0; i < numCards; i++) {
     cards.push({
       instanceID: makeCardInstanceID(startID++),
       scryfallID: getRandomCard().id,
-      cardText: ""
+      playerOwnerID: playerID,
     })
   }
   return ({
@@ -44,78 +45,61 @@ function drawCards(hand: SecretHand, numCards: number, startID: number): { retHa
 export const StoryGame: Game<GameState> = {
   setup: ({ ctx }) => {
     let curNextID = 0;
-    const players: Record<string, PlayerState> = {};
+    const players: Record<number, PlayerState> = {};
     // Initialize players
     for (let i = 0; i < ctx.numPlayers; i++) {
-      const { retHand, nextID } = drawCards({ cards: [] }, INITIAL_HAND_SIZE, curNextID)
+      const { retHand, nextID } = drawCards({ cards: [] }, INITIAL_HAND_SIZE, curNextID, i.toString())
       curNextID = nextID;
 
-      players[i.toString()] = {
+      players[i] = {
         secretHand: retHand,
+        turnsTaken: 0
       }
     }
     return {
       nextCardID: curNextID,
-      sharedBoard: [], // Empty board 
+      sharedBoard: [], // Empty board
       players: players
     }
   },
 
   phases: {
 
-    storymaking: {
-      start: true,
+    upkeep: {
+      start: false, // Set to true once done developing Main
       turn: {
         activePlayers: { all: 'ANY' },
       },
       // endIf condition is met
       moves: {
+      },
+    },
+
+    main: {
+      start: true,
+      turn: {
+        activePlayers: { all: 'ANY' },
+      },
+      moves: {
         /**
-         * Draws a number of random cards
-         * @param state - gamestate and playerID of who to draw cards
-         * @returns updates state's next card ID and player's hand 
-         */
+        * Draws a number of random cards
+        * @param state - gamestate and playerID of who to draw cards
+        * @returns updates state's next card ID and player's hand 
+        */
         drawCard: ({ G, playerID }) => {
           // getRandomCard();
           if (playerID && G.players[playerID]) {
-            const { retHand, nextID } = drawCards(G.players[playerID].secretHand, 1, G.nextCardID)
+            const { retHand, nextID } = drawCards(G.players[playerID].secretHand, 1, G.nextCardID, playerID)
             G.players[playerID].secretHand = retHand;
             G.nextCardID = nextID;
-          }
-        },
-        /**
-        * Sets the player's story text for a card in their hand.
-        * @param state - game state and player ID
-        * @param cardID - cardID's text to be changed
-        * @param text - text to set to
-        * @returns null, immutably changes the player's hand.
-        */
-        setCardText: ({ G, playerID }, cardID: string, text: string) => {
-          if (playerID && G.players[playerID]) {
-            const cards = G.players[playerID].secretHand.cards;
-
-            for (const card of cards) {
-              if (card.instanceID == cardID) {
-                card.cardText = text;
-                break;
-              }
-            }
           }
         },
         /*
          * Play a card on the board for all to see, with its story text
         */
         playCard: () => {
-          return; // Allow playing the card on secret board for planning?
+          return;
         }
-      },
-    },
-
-    presenting: {
-      moves: {
-        // playCard: ({ G, ctx }, cardID: string) => {
-        //   // find card in hand's index, then return that card?
-        // },
       },
     },
   },

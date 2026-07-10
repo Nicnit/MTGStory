@@ -1,4 +1,4 @@
 export const PHASES = {
-  STORYMAKING: 'storymaking',
-  PRESENTING: 'presenting',
+  UPKEEP: 'upkeep',
+  MAIN: 'main',
 } as const;

@@ -38,7 +38,7 @@ export interface UICard extends LocalCard {
 export interface CardInstance {
   instanceID: string; // Differentite between instances of the same card. Doesn't depend on scryfallID.
   scryfallID: string;
-  cardText: string;
+  playerOwnerID: string; // Player owner's id
 }
 
 
