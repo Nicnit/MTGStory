@@ -3,6 +3,7 @@ import Card from './Card';
 import { LocalCard } from '../../global-types/card';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { UICard } from '../../global-types/card';
+import { useDraggable } from '@dnd-kit/core'
 
 interface HandProps {
   cards: UICard[];

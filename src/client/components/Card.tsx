@@ -10,17 +10,25 @@ interface CardProps {
 }
 
 function Card({ id, name, image, onClick }: CardProps) {
-  const { attributes, listeners, setNodeRef, transform } = useSortable({
+  // Also iuncludes useDraggable
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: id,
   })
 
   const style = {
-    transform: CSS.Translate.toString(transform),   // handle smooth movement math
+    transform: CSS.Translate.toString(transform),   // Move the card to its dragged to position
+    transition, // smooths the animation when reordering
   }
 
 
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="card" onClick={onClick}>
+    <div ref=
+      {setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className="card"
+      onClick={onClick}>
       <img src={image} alt={name} className="card-image" />
     </div>
   );
