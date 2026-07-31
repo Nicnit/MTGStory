@@ -41,4 +41,8 @@ export interface CardInstance {
   playerOwnerID: string; // Player owner's id
 }
 
+export interface PlacedCardInstance extends CardInstance {
+  position: { x: number, y: number }
+}
+
 

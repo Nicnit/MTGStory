@@ -1,6 +1,8 @@
 import type { Game } from 'boardgame.io';
 import { getRandomCard } from '../data/card-data';
 import { CardInstance } from '@/global-types/card';
+import { INVALID_MOVE } from 'boardgame.io/dist/types/src/core/constants';
+import { PlacedCardInstance } from '@/global-types/card';
 
 const INITIAL_HAND_SIZE = 7;
 
@@ -19,7 +21,7 @@ type PlayerState = {
 
 export type GameState = {
   nextCardID: number;
-  sharedBoard: CardInstance[];
+  sharedBoard: PlacedCardInstance[];
   players: Record<string, PlayerState>;
 }
 
@@ -68,7 +70,7 @@ export const StoryGame: Game<GameState> = {
     upkeep: {
       start: false, // Set to true once done developing Main
       turn: {
-        activePlayers: { all: 'ANY' },
+        activePlayers: { all: 'ANY' }, // TODO change ANY to make specific players active
       },
       // endIf condition is met
       moves: {
@@ -82,22 +84,56 @@ export const StoryGame: Game<GameState> = {
       },
       moves: {
         /**
-        * Draws a number of random cards
-        * @param state - gamestate and playerID of who to draw cards
+        * Draws a number of random cards for the passed playerID (must be active player)
+        * @param state - gamestate of active player
         * @returns updates state's next card ID and player's hand 
         */
-        drawCard: ({ G, playerID }) => {
+        drawCard: ({ G, playerID },) => {
           // getRandomCard();
           if (playerID && G.players[playerID]) {
-            const { retHand, nextID } = drawCards(G.players[playerID].secretHand, 1, G.nextCardID, playerID)
+            const { retHand, nextID } = drawCards(
+              G.players[playerID].secretHand,
+              1,
+              G.nextCardID,
+              playerID)
             G.players[playerID].secretHand = retHand;
             G.nextCardID = nextID;
-          }
+          } else { return INVALID_MOVE }
         },
-        /*
-         * Play a card on the board for all to see, with its story text
+        /**
+        * Play a card on the board for all to see, with its story text
+        * @param gamestate - state, and ID of player playing card (must be active)
+        * @param cardIDToPlay - which card to play
+        * @param boardCards - boardcards to use when returning new boardstate?
+        * @returns new board cards
         */
-        playCard: () => {
+        playCard: (
+          { G, playerID },
+          cardIDToPlay: string
+        ) => {
+          // Move card from that hand into new zone
+          if (!playerID || !G.players[playerID]) return INVALID_MOVE
+
+          const hand = G.players[playerID].secretHand.cards;
+          const cardIndex = hand.findIndex(card =>
+            card.instanceID === cardIDToPlay)
+          if (cardIndex === -1) return INVALID_MOVE
+
+          // Remove the card from hand
+          const [removedCard] = hand.splice(cardIndex, 1)
+
+          // TODONOW work on coordinates
+          // Add card to new zone
+          const newCard: PlacedCardInstance = { ...removedCard, }
+          G.sharedBoard.push(removedCard)
+
+          return;
+        },
+
+        moveCard: (
+          { G },
+          cardIDToMove: string
+        ) => {
           return;
         }
       },
