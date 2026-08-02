@@ -1,8 +1,10 @@
 import type { Game } from 'boardgame.io';
 import { getRandomCard } from '../data/card-data';
 import { CardInstance } from '@/global-types/card';
+import { LocalBoardPosition } from '@/global-types/card';
 import { INVALID_MOVE } from 'boardgame.io/dist/types/src/core/constants';
 import { PlacedCardInstance } from '@/global-types/card';
+import { Board } from '@/global-types/board';
 
 const INITIAL_HAND_SIZE = 7;
 
@@ -21,15 +23,17 @@ type PlayerState = {
 
 export type GameState = {
   nextCardID: number;
-  sharedBoard: PlacedCardInstance[];
+  sharedBoard: Board;
   players: Record<string, PlayerState>;
 }
+
+// Helper Functions
 
 function makeCardInstanceID(instanceID: number): string {
   return (`card-${instanceID}`)
 }
 
-function drawCards(hand: SecretHand, numCards: number, startID: number, playerID: string): { retHand: SecretHand, nextID: number } {
+function drawCardsHelper(hand: SecretHand, numCards: number, startID: number, playerID: string): { hand: SecretHand, nextID: number } {
   const cards: CardInstance[] = [...hand.cards];
   for (let i = 0; i < numCards; i++) {
     cards.push({
@@ -39,28 +43,45 @@ function drawCards(hand: SecretHand, numCards: number, startID: number, playerID
     })
   }
   return ({
-    retHand: { cards },
+    hand: { cards },
     nextID: startID
   })
+}
+
+function moveCardHelper(
+  cardID: string,
+  board: Board,
+  newPos: LocalBoardPosition
+): Board | null {
+  const i = board.placedCards.findIndex(
+    card => card.instanceID === cardID);
+  if (i === -1) return null
+
+  return {
+    placedCards: board.placedCards.map(
+      (card, j) =>
+        j === i ? { ...card, position: newPos } : card
+    ),
+  }
 }
 
 export const StoryGame: Game<GameState> = {
   setup: ({ ctx }) => {
     let curNextID = 0;
-    const players: Record<number, PlayerState> = {};
+    const players: Record<string, PlayerState> = {};
     // Initialize players
     for (let i = 0; i < ctx.numPlayers; i++) {
-      const { retHand, nextID } = drawCards({ cards: [] }, INITIAL_HAND_SIZE, curNextID, i.toString())
+      const { hand, nextID } = drawCardsHelper({ cards: [] }, INITIAL_HAND_SIZE, curNextID, i.toString())
       curNextID = nextID;
 
-      players[i] = {
-        secretHand: retHand,
+      players[String(i)] = {
+        secretHand: hand,
         turnsTaken: 0
       }
     }
     return {
       nextCardID: curNextID,
-      sharedBoard: [], // Empty board
+      sharedBoard: { placedCards: [] }, // Empty board
       players: players
     }
   },
@@ -90,15 +111,14 @@ export const StoryGame: Game<GameState> = {
         */
         drawCard: ({ G, playerID },) => {
           // getRandomCard();
-          if (playerID && G.players[playerID]) {
-            const { retHand, nextID } = drawCards(
-              G.players[playerID].secretHand,
-              1,
-              G.nextCardID,
-              playerID)
-            G.players[playerID].secretHand = retHand;
-            G.nextCardID = nextID;
-          } else { return INVALID_MOVE }
+          if (!playerID || !G.players[playerID]) return INVALID_MOVE
+          const { hand, nextID } = drawCardsHelper(
+            G.players[playerID].secretHand,
+            1,
+            G.nextCardID,
+            playerID)
+          G.players[playerID].secretHand = hand;
+          G.nextCardID = nextID;
         },
         /**
         * Play a card on the board for all to see, with its story text
@@ -109,7 +129,8 @@ export const StoryGame: Game<GameState> = {
         */
         playCard: (
           { G, playerID },
-          cardIDToPlay: string
+          cardIDToPlay: string,
+          position: LocalBoardPosition
         ) => {
           // Move card from that hand into new zone
           if (!playerID || !G.players[playerID]) return INVALID_MOVE
@@ -120,20 +141,33 @@ export const StoryGame: Game<GameState> = {
           if (cardIndex === -1) return INVALID_MOVE
 
           // Remove the card from hand
-          const [removedCard] = hand.splice(cardIndex, 1)
+          const [removedCard]: CardInstance[] = hand.splice(cardIndex, 1)
 
           // TODONOW work on coordinates
           // Add card to new zone
-          const newCard: PlacedCardInstance = { ...removedCard, }
-          G.sharedBoard.push(removedCard)
+          // package move into helper
+          G.sharedBoard.placedCards.push({ ...removedCard, position })
 
           return;
         },
 
+        /**
+        * Returns a new Board with an updated Card Position
+        * @param cardID - ID of card to move
+        * @param board - Board with card to move
+        * @param newPos - new position of the card
+        */
         moveCard: (
-          { G },
-          cardIDToMove: string
+          { G, },
+          cardID: string,
+          pos: LocalBoardPosition
         ) => {
+          // TODO list:
+          // check new position is in boudns and valid
+          // check active player has permission to move the cards
+          const newBoard: Board | null = moveCardHelper(cardID, G.sharedBoard, pos)
+          if (newBoard === null) return INVALID_MOVE
+          G.sharedBoard = newBoard
           return;
         }
       },
@@ -141,6 +175,6 @@ export const StoryGame: Game<GameState> = {
   },
   turn: {
     minMoves: 1,
-    maxMoves: 1,
+    maxMoves: 10, // TODO configure correctly. 
   },
 }

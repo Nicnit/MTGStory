@@ -38,8 +38,10 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
-    if (!over) return; // If not over anything
+    if (!over) return;
     if (over.id === 'board') {
+
+      // get position in board
       moves.playCard(active.id);
     }
   }

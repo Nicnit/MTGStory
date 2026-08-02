@@ -1,5 +1,10 @@
 import { CardType } from './card-types';
 
+export interface LocalBoardPosition {
+  x: number,
+  y: number
+}
+
 export interface LocalCard {
   id: string;
   name: string;
@@ -42,7 +47,7 @@ export interface CardInstance {
 }
 
 export interface PlacedCardInstance extends CardInstance {
-  position: { x: number, y: number }
+  position: LocalBoardPosition
 }
 
 
