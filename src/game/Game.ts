@@ -29,42 +29,8 @@ export type GameState = {
 
 // Helper Functions
 
-function makeCardInstanceID(instanceID: number): string {
-  return (`card-${instanceID}`)
-}
 
-function drawCardsHelper(hand: SecretHand, numCards: number, startID: number, playerID: string): { hand: SecretHand, nextID: number } {
-  const cards: CardInstance[] = [...hand.cards];
-  for (let i = 0; i < numCards; i++) {
-    cards.push({
-      instanceID: makeCardInstanceID(startID++),
-      scryfallID: getRandomCard().id,
-      playerOwnerID: playerID,
-    })
-  }
-  return ({
-    hand: { cards },
-    nextID: startID
-  })
-}
 
-function moveCardHelper(
-  cardID: string,
-  board: Board,
-  newPos: LocalBoardPosition
-): Board | null {
-  const i = board.placedCards.findIndex(
-    card => card.instanceID === cardID);
-  if (i === -1) return null
-
-  return {
-    id: board.id,
-    placedCards: board.placedCards.map(
-      (card, j) =>
-        j === i ? { ...card, position: newPos } : card
-    ),
-  }
-}
 
 export const StoryGame: Game<GameState> = {
   setup: ({ ctx }) => {

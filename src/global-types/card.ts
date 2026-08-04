@@ -1,5 +1,10 @@
 import { CardType } from './card-types';
 import { LocalBoardPosition } from './board';
+import { SecretHand } from '@/game/Game';
+import { Board } from './board';
+import { getRandomCard } from '@/data/card-data';
+
+// For board-related operations or types see ./board.ts
 
 export interface LocalCard {
   id: string;
@@ -32,7 +37,7 @@ export interface UICard extends LocalCard {
   instanceID: string;
 }
 
-
+// Consider: CardInstance loses information on the card, i.e. type etc. perhaps restructure
 /**
  * Used in Game.ts to track instances of cards in hands.
  */
@@ -47,3 +52,25 @@ export interface PlacedCardInstance extends CardInstance {
 }
 
 
+
+// Methods and such
+
+function makeCardInstanceID(instanceID: number): string {
+  return (`card-${instanceID}`)
+}
+
+
+function drawCards(hand: SecretHand, numCards: number, startID: number, playerID: string): { hand: SecretHand, nextID: number } {
+  const cards: CardInstance[] = [...hand.cards];
+  for (let i = 0; i < numCards; i++) {
+    cards.push({
+      instanceID: makeCardInstanceID(startID++),
+      scryfallID: getRandomCard().id,
+      playerOwnerID: playerID,
+    })
+  }
+  return ({
+    hand: { cards },
+    nextID: startID
+  })
+}
