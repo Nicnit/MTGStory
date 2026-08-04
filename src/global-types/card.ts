@@ -1,6 +1,5 @@
 import { CardType } from './card-types';
 import { LocalBoardPosition } from './board';
-import { SecretHand } from '@/game/Game';
 import { Board } from './board';
 import { getRandomCard } from '@/data/card-data';
 
@@ -38,39 +37,98 @@ export interface UICard extends LocalCard {
 }
 
 // Consider: CardInstance loses information on the card, i.e. type etc. perhaps restructure
+// Could extend from ScryfallCard
+// Consider: assumes ownership stays consistent forever. Otherwise decoupling between card playerID
+// and hand playerID possible. Currently this allows convenience in accessing playerID
 /**
  * Used in Game.ts to track instances of cards in hands.
  */
 export interface CardInstance {
   instanceID: string; // Differentite between instances of the same card. Doesn't depend on scryfallID.
   scryfallID: string;
-  playerOwnerID: string; // Player owner's id
+  playerOwnerID: string;
 }
 
 export interface PlacedCardInstance extends CardInstance {
   position: LocalBoardPosition
 }
 
+/**
+ * used in Game.ts to track hands of players that others can't see.
+ * TODO integrate with boardgame.io secret feature
+ */
+export interface Hand {
+  cards: CardInstance[]
+}
+
+export interface SecretHand extends Hand {
+  playerID: string
+}
+
 
 
 // Methods and such
 
+/**
+ * Convenient prepending
+ * @param instanceID id
+ * @returns full id string
+ */
 function makeCardInstanceID(instanceID: number): string {
   return (`card-${instanceID}`)
 }
 
-
-function drawCards(hand: SecretHand, numCards: number, startID: number, playerID: string): { hand: SecretHand, nextID: number } {
-  const cards: CardInstance[] = [...hand.cards];
+/**
+ * Draws cards into a player's hand. 
+ * Must use startID, and update startID with return value to have unique cardIDs
+ * @param hand Hand to draw cards into
+ * @param numCards How many cards to draw
+ * @param startID number tracking ID to give new cards
+ * @param playerID player to assign ownership of cards to
+ * @returns new Hand, and next card ID MUST be passed to startID
+ */
+export function drawCards(hand: Hand, numCards: number, startID: number, playerID: string): { hand: Hand, nextID: number } {
+  let nextHand: Hand = { cards: [...hand.cards] }
   for (let i = 0; i < numCards; i++) {
-    cards.push({
+    nextHand = addCardToHand({
       instanceID: makeCardInstanceID(startID++),
       scryfallID: getRandomCard().id,
       playerOwnerID: playerID,
-    })
+    }, nextHand)
   }
+
   return ({
-    hand: { cards },
+    hand: nextHand,
     nextID: startID
   })
+}
+
+/**
+ * Removes a card from a hand by card ID
+ * @param hand Hand with card to remove
+ * @param cardID card to remove
+ * @returns a new hand without the card
+ */
+export function removeCardFromHand(hand: Hand, cardID: string): Hand {
+  let ind;
+  ind = hand.cards.findIndex(card => card.instanceID === cardID)
+  if (ind === -1) return { ...hand } // Card already not in hand
+
+  return {
+    cards: hand.cards.toSpliced(ind, 1)
+  }
+}
+
+/**
+ * Returns a new hand with the added card
+ * @param card Card to be added
+ * @param hand Hand to base off of
+ * @returns new hand with new card
+ */
+export function addCardToHand(card: CardInstance, hand: Hand): Hand {
+  // CHeck for matching playerID for continuity?
+  // Handsize check?
+
+  // Immutable addition
+  return { cards: hand.cards.toSpliced(hand.cards.length, 0, card) }
 }

@@ -1,5 +1,8 @@
 import { errors } from "playwright";
-import { CardInstance, PlacedCardInstance } from "./card";
+import { CardInstance, PlacedCardInstance, removeCardFromHand } from "./card";
+import { Hand } from "./card";
+import Card from "@/client/components/Card";
+import { addCardToHand } from "./card";
 
 // Note this system uses DOwn-y coords. Origin is Top Left
 
@@ -63,13 +66,10 @@ export function clampBoardPosition(pos: Position2D, bounds: BoardBounds): Positi
  * @param card card to be added
  * @param board board to adad card to
  * @param pos position of card in board
- * @returns null if invalid parameters or position, otherwise new board
+ * @returns null if invalid position, otherwise new board
  */
-export function addCardToBoard(card: CardInstance, board: Board, pos: Position2D): Board | null {
-  if (
-    !board.bounds ||
-    !isValidPosition(pos, board.bounds)
-  ) return null
+export function addCardToBoard(card: CardInstance, board: Board, pos: Position2D): Board {
+  if (!isValidPosition(pos, board.bounds)) pos = clampBoardPosition(pos, board.bounds)
 
   return {
     id: board.id,
@@ -78,42 +78,85 @@ export function addCardToBoard(card: CardInstance, board: Board, pos: Position2D
   }
 }
 
-// Play Card onto Board
-// MOve Card within Board
 
 /**
  * Changes position of card in a board, if the new position is valid.
  * @param cardID ID of card to move
  * @param board board containing card to move
- * @param newPos new Position of the board
+ * @param pos new Position of the board
  * @returns null if position invalid, otherwise new Board with updated position
  */
 export function moveCardInBoard(
   cardID: string,
   board: Board,
-  newPos: LocalBoardPosition
+  pos: Position2D
 ): Board | null {
   const i = board.placedCards.findIndex(
     card => card.instanceID === cardID
   )
-  if (
-    i === -1 ||
-    !isValidPosition(board.placedCards[i].position, board.bounds)
-  ) return null
+  if (i === -1) return null
+
+  if (!isValidPosition(board.placedCards[i].position, board.bounds))
+    pos = clampBoardPosition(pos, board.bounds)
 
   return {
     id: board.id,
     placedCards: board.placedCards.map(
       (card, j) =>
-        j === i ? { ...card, position: newPos } : card
+        j === i ? { ...card, position: { ...card.position, x: pos.x, y: pos.y } } : card
     ),
     bounds: board.bounds
   }
 }
 
+/**
+ * Removes a card from a board by card ID
+ * @param board board with card to remove
+ * @param cardID card to remove
+ * @returns a new board without the card
+ */
+export function removeCardFromBoard(cardID: string, board: Board): Board {
+  let ind;
+  ind = board.placedCards.findIndex(card => card.instanceID === cardID)
+  if (ind === -1) return { ...board } // Card already not on board
 
+  return {
+    ...board,
+    placedCards: board.placedCards.toSpliced(ind, 1)
+  }
+}
 
-// Remove Card from Board
-// Move Card from Board to Hand
+/**
+ * Return new board and hand after removing the card by ID from the hand and adding it to board at a position
+ * @param cardID card to move by ID
+ * @param hand hand to add card to
+ * @param board board to remove card from
+ * @param position position to add the card at
+ * @returns an updated new board and hand
+ */
+export function handToBoard(cardID: string, hand: Hand, board: Board, pos: Position2D): { hand: Hand, board: Board } | null {
+  if (!isValidPosition(pos, board.bounds)) return null // Consider clamping if incorrect
 
+  const card = hand.cards.find(card => card.instanceID === cardID)
+  if (card === undefined) return null
 
+  const newBoard: Board = addCardToBoard(card, board, pos)
+  const newHand: Hand = removeCardFromHand(hand, cardID)
+  return { board: newBoard, hand: newHand }
+}
+
+/**
+ * Return new board and hand after removing the card by ID from the board and adding it to hand
+ * @param cardID card to move by ID
+ * @param board board to remove card from
+ * @param hand hand to add card to
+ * @returns an updated new board and hand
+ */
+export function boardToHand(cardID: string, board: Board, hand: Hand): { board: Board, hand: Hand } | null {
+  const card = board.placedCards.find(card => card.instanceID === cardID)
+  if (card === undefined) return null
+
+  const newHand: Hand = addCardToHand(card, hand)
+  const newBoard: Board = removeCardFromBoard(cardID, board)
+  return { board: newBoard, hand: newHand }
+}

@@ -5,15 +5,9 @@ import { LocalBoardPosition } from '@/global-types/board';
 import { INVALID_MOVE } from 'boardgame.io/dist/types/src/core/constants';
 import { PlacedCardInstance } from '@/global-types/card';
 import { Board } from '@/global-types/board';
+import { SecretHand } from '@/global-types/card';
 
 const INITIAL_HAND_SIZE = 7;
-
-/**
- * used in Game.ts to track hands of players that others can't see.
- */
-export interface SecretHand { // TODO combine cardText as ? into cards array
-  cards: CardInstance[];
-}
 
 type PlayerState = {
   secretHand: SecretHand;
