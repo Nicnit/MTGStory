@@ -1,7 +1,7 @@
 import type { Game } from 'boardgame.io';
 import { getRandomCard } from '../data/card-data';
 import { CardInstance } from '@/global-types/card';
-import { LocalBoardPosition } from '@/global-types/card';
+import { LocalBoardPosition } from '@/global-types/board';
 import { INVALID_MOVE } from 'boardgame.io/dist/types/src/core/constants';
 import { PlacedCardInstance } from '@/global-types/card';
 import { Board } from '@/global-types/board';
@@ -58,6 +58,7 @@ function moveCardHelper(
   if (i === -1) return null
 
   return {
+    id: board.id,
     placedCards: board.placedCards.map(
       (card, j) =>
         j === i ? { ...card, position: newPos } : card
@@ -81,7 +82,7 @@ export const StoryGame: Game<GameState> = {
     }
     return {
       nextCardID: curNextID,
-      sharedBoard: { placedCards: [] }, // Empty board
+      sharedBoard: { id: 0, placedCards: [] }, // Empty board. Shared board gets ID of 0
       players: players
     }
   },

@@ -1,9 +1,5 @@
 import { CardType } from './card-types';
-
-export interface LocalBoardPosition {
-  x: number,
-  y: number
-}
+import { LocalBoardPosition } from './board';
 
 export interface LocalCard {
   id: string;
