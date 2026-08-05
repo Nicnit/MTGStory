@@ -1,6 +1,5 @@
-import { CardType } from './card-types';
+import { CardType } from '../model/card-types';
 import { LocalBoardPosition } from './board';
-import { Board } from './board';
 import { getRandomCard } from '@/data/card-data';
 
 // For board-related operations or types see ./board.ts
@@ -36,7 +35,6 @@ export interface UICard extends LocalCard {
   instanceID: string;
 }
 
-// Consider: CardInstance loses information on the card, i.e. type etc. perhaps restructure
 // Could extend from ScryfallCard
 // Consider: assumes ownership stays consistent forever. Otherwise decoupling between card playerID
 // and hand playerID possible. Currently this allows convenience in accessing playerID
@@ -85,9 +83,11 @@ function makeCardInstanceID(instanceID: number): string {
  * @param numCards How many cards to draw
  * @param startID number tracking ID to give new cards
  * @param playerID player to assign ownership of cards to
- * @returns new Hand, and next card ID MUST be passed to startID
+ * @returns new cardInstances array for a Hand, and next card ID MUST be passed to startID
  */
-export function drawCards(hand: Hand, numCards: number, startID: number, playerID: string): { hand: Hand, nextID: number } {
+export function drawCards(hand: Hand, numCards: number, startID: number, playerID: string): { cards: CardInstance[], nextID: number } {
+  // playerID as argument probly not necessary, could just use SecretHand
+  // but might have different hand types in future
   let nextHand: Hand = { cards: [...hand.cards] }
   for (let i = 0; i < numCards; i++) {
     nextHand = addCardToHand({
@@ -98,7 +98,7 @@ export function drawCards(hand: Hand, numCards: number, startID: number, playerI
   }
 
   return ({
-    hand: nextHand,
+    cards: nextHand.cards,
     nextID: startID
   })
 }

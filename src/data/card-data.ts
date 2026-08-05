@@ -1,5 +1,5 @@
-import { LocalCard } from '../global-types/card';
-import { CardType } from '../global-types/card-types';
+import { LocalCard } from '../model/card';
+import { CardType } from '../model/card-types';
 import cardPool from './card-pool.json';
 
 const cards = cardPool as LocalCard[];

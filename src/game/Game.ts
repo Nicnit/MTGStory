@@ -1,11 +1,7 @@
 import type { Game } from 'boardgame.io';
-import { getRandomCard } from '../data/card-data';
-import { CardInstance } from '@/global-types/card';
-import { LocalBoardPosition } from '@/global-types/board';
+import { CardInstance, drawCards, SecretHand } from '@/model/card';
+import { LocalBoardPosition, Board, moveCardInBoard } from '@/model/board';
 import { INVALID_MOVE } from 'boardgame.io/dist/types/src/core/constants';
-import { PlacedCardInstance } from '@/global-types/card';
-import { Board } from '@/global-types/board';
-import { SecretHand } from '@/global-types/card';
 
 const INITIAL_HAND_SIZE = 7;
 
@@ -28,12 +24,12 @@ export type GameState = {
 
 export const StoryGame: Game<GameState> = {
   setup: ({ ctx }) => {
-    let curNextID = 0;
     const players: Record<string, PlayerState> = {};
-    // Initialize players
+    let nextCardID = 0
     for (let i = 0; i < ctx.numPlayers; i++) {
-      const { hand, nextID } = drawCardsHelper({ cards: [] }, INITIAL_HAND_SIZE, curNextID, i.toString())
-      curNextID = nextID;
+      const drawn = drawCards({ cards: [] }, INITIAL_HAND_SIZE, nextCardID, i.toString())
+      nextCardID = drawn.nextID
+      const hand: SecretHand = { cards: drawn.cards, playerID: i.toString() }
 
       players[String(i)] = {
         secretHand: hand,
@@ -41,8 +37,9 @@ export const StoryGame: Game<GameState> = {
       }
     }
     return {
-      nextCardID: curNextID,
-      sharedBoard: { id: 0, placedCards: [] }, // Empty board. Shared board gets ID of 0
+      nextCardID: nextCardID,
+      // TODO method to get bounds of board
+      sharedBoard: { id: 0, placedCards: [], bounds: null }, // Empty board. Shared board gets ID of 0
       players: players
     }
   },
@@ -73,13 +70,14 @@ export const StoryGame: Game<GameState> = {
         drawCard: ({ G, playerID },) => {
           // getRandomCard();
           if (!playerID || !G.players[playerID]) return INVALID_MOVE
-          const { hand, nextID } = drawCardsHelper(
+          const { cards, nextID } = drawCards(
             G.players[playerID].secretHand,
             1,
             G.nextCardID,
-            playerID)
-          G.players[playerID].secretHand = hand;
-          G.nextCardID = nextID;
+            playerID
+          )
+          G.players[playerID].secretHand = { playerID, cards }
+          G.nextCardID = nextID
         },
         /**
         * Play a card on the board for all to see, with its story text
@@ -126,7 +124,7 @@ export const StoryGame: Game<GameState> = {
           // TODO list:
           // check new position is in boudns and valid
           // check active player has permission to move the cards
-          const newBoard: Board | null = moveCardHelper(cardID, G.sharedBoard, pos)
+          const newBoard: Board | null = moveCardInBoard(cardID, G.sharedBoard, pos)
           if (newBoard === null) return INVALID_MOVE
           G.sharedBoard = newBoard
           return;
