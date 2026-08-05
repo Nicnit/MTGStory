@@ -1,8 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { CardType, CARD_TYPES } from '../src/global-types/card-types';
-import { ScryfallCard } from '../src/global-types/card'
-import { LocalCard } from '../src/global-types/card'
+import { CardType, CARD_TYPES } from '../src/model/card-types';
+import { ScryfallCard, LocalCard } from '../src/model/card'
 import readline from 'readline';
 
 // parameters, change as necessary

@@ -1,6 +1,6 @@
 import type { Game } from 'boardgame.io';
 import { CardInstance, drawCards, SecretHand } from '@/model/card';
-import { LocalBoardPosition, Board, moveCardInBoard } from '@/model/board';
+import { LocalBoardPosition, Board, moveCardInBoard, addCardToBoard } from '@/model/board';
 import { INVALID_MOVE } from 'boardgame.io/dist/types/src/core/constants';
 
 const INITIAL_HAND_SIZE = 7;
@@ -81,31 +81,33 @@ export const StoryGame: Game<GameState> = {
         },
         /**
         * Play a card on the board for all to see, with its story text
-        * @param gamestate - state, and ID of player playing card (must be active)
-        * @param cardIDToPlay - which card to play
-        * @param boardCards - boardcards to use when returning new boardstate?
+        * @param gamestate state, and ID of player playing card (must be active)
+        * @param cardID which card to play
+        * @param pos position on the board to play it at
         * @returns new board cards
         */
         playCard: (
           { G, playerID },
-          cardIDToPlay: string,
-          position: LocalBoardPosition
+          cardID: string,
+          pos: LocalBoardPosition
         ) => {
           // Move card from that hand into new zone
           if (!playerID || !G.players[playerID]) return INVALID_MOVE
 
+          const board = G.sharedBoard // Make dynamic eventually?
           const hand = G.players[playerID].secretHand.cards;
           const cardIndex = hand.findIndex(card =>
-            card.instanceID === cardIDToPlay)
+            card.instanceID === cardID)
           if (cardIndex === -1) return INVALID_MOVE
 
-          // Remove the card from hand
           const [removedCard]: CardInstance[] = hand.splice(cardIndex, 1)
 
-          // TODONOW work on coordinates
+          const newBoard: Board = addCardToBoard(removedCard, board, pos)
+
+          // TODONOW work on coordinates (after workign on bounds)
           // Add card to new zone
           // package move into helper
-          G.sharedBoard.placedCards.push({ ...removedCard, position })
+          G.sharedBoard = newBoard
 
           return;
         },

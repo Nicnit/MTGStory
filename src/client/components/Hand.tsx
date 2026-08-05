@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import Card from './Card';
-import { LocalCard } from '../../global-types/card';
+import { LocalCard } from '../../model/card';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
-import { UICard } from '../../global-types/card';
+import { UICard } from '../../model/card';
 import { useDraggable } from '@dnd-kit/core'
 
 interface HandProps {

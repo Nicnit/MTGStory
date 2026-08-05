@@ -1,12 +1,10 @@
 import { Client } from 'boardgame.io/react';
-import { StoryGame } from '../game/Game';
+import { StoryGame, GameState } from '../game/Game';
 import { Local } from 'boardgame.io/multiplayer';
-import { UICard } from '../global-types/card.ts'
+import { UICard, LocalCard } from '../model/card'
 import Hand from './components/Hand';
 import cardData from '../data/card-pool.json';
-import { LocalCard } from '../global-types/card';
 import { PHASES } from '../game/phases';
-import { GameState } from '../game/Game';
 import {
   DndContext,
   useSensor,
@@ -41,8 +39,9 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
     if (!over) return;
     if (over.id === 'board') {
 
-      // get position in board
-      moves.playCard(active.id);
+      if (over.data.current)
+
+        moves.playCard(active.id);
     }
   }
 
