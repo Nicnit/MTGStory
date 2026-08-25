@@ -35,13 +35,12 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
   )
 
   function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-    if (!over) return;
-    if (over.id === 'board') {
-
-      if (over.data.current)
-
-        moves.playCard(active.id);
+    const { active: cardInfo, over: boardInfo } = event
+    if (!boardInfo) return;
+    if (boardInfo.id === 'board') {
+      if (cardInfo.data.current)
+        const pos = // ?? 
+          moves.playCard({ G, playerID }, cardInfo.id,);
     }
   }
 
@@ -88,6 +87,7 @@ export default App;
   * @param playerID - player who's hand to update
   * @return Cards in hand as UICards[]
   */
+
 function getHandFromGameState(G: GameState, playerID: string | null): UICard[] {
   if (!playerID || !G.players[playerID]) {
     return [];

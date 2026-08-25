@@ -2,6 +2,7 @@ import type { Game } from 'boardgame.io';
 import { CardInstance, drawCards, SecretHand } from '@/model/card';
 import { LocalBoardPosition, Board, moveCardInBoard, addCardToBoard } from '@/model/board';
 import { INVALID_MOVE } from 'boardgame.io/dist/types/src/core/constants';
+import { BoardBounds } from '@/model/geometry';
 
 const INITIAL_HAND_SIZE = 7;
 
@@ -36,10 +37,13 @@ export const StoryGame: Game<GameState> = {
         turnsTaken: 0
       }
     }
+
+    // TODO remove placeholder buonds
+    const placeholderBounds: BoardBounds = { origin: { x: 0, y: 0 }, width: 1000, height: 1000 }
     return {
       nextCardID: nextCardID,
       // TODO method to get bounds of board
-      sharedBoard: { id: 0, placedCards: [], bounds: null }, // Empty board. Shared board gets ID of 0
+      sharedBoard: { id: 0, placedCards: [], bounds: placeholderBounds }, // Empty board. Shared board gets ID of 0
       players: players
     }
   },
