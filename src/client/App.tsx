@@ -39,8 +39,8 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
     if (!boardInfo) return;
     if (boardInfo.id === 'board') {
       if (cardInfo.data.current)
-        const pos = // ?? 
-          moves.playCard({ G, playerID }, cardInfo.id,);
+        //const pos = // ??  TODO
+        moves.playCard({ G, playerID }, cardInfo.id,);
     }
   }
 

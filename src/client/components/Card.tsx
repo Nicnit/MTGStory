@@ -1,6 +1,5 @@
-import { DndContext, useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities';
-import { SortableContext, horizontalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
 
 interface CardProps {
   id: string;

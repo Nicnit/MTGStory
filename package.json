@@ -17,7 +17,8 @@
     "all": "^0.0.0",
     "boardgame.io": "^0.50.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-merge-refs": "^3.0.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

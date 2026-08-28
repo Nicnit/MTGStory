@@ -1,6 +1,10 @@
 import { CardInstance, PlacedCardInstance, removeCardFromHand } from "./card";
 import { Position2D, BoardBounds, isValidPosition, clampBoardPosition } from "./geometry";
 
+const BOARD_ID_PREPEND = "board-"; // what to prepend before the board ID, in createBoardID
+
+
+
 export interface Board {
   id: string,
   placedCards: PlacedCardInstance[],
@@ -77,4 +81,13 @@ export function removeCardFromBoard(cardID: string, board: Board): Board {
     ...board,
     placedCards: board.placedCards.toSpliced(ind, 1)
   }
+}
+
+
+/**
+ * prepend the board ID
+ * @param IDnumber the number to apppend
+ */
+export function createBoardID(IDnumber: number) {
+  return BOARD_ID_PREPEND + IDnumber.toString();
 }
