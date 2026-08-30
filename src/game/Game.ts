@@ -18,10 +18,6 @@ export type GameState = {
   players: Record<string, PlayerState>;
 }
 
-// Helper Functions
-
-
-
 
 export const StoryGame: Game<GameState> = {
   setup: ({ ctx }) => {
@@ -38,14 +34,11 @@ export const StoryGame: Game<GameState> = {
       }
     }
 
-    // TODO remove placeholder buonds
-    //
-    const placeholderBounds: BoardBounds = { origin: { x: 0, y: 0 }, width: 1000, height: 1000 }
+    // Gives  1000 units on each axis of hypothetical logical coordinates. Screen space is mapped onto these logical bounds
+    const logicalBounds: BoardBounds = { origin: { x: 0, y: 0 }, width: 1000, height: 1000 }
     return {
       nextCardID: nextCardID,
-      // TODO method to get bounds of board
-
-      sharedBoard: { id: createBoardID(0), placedCards: [], bounds: placeholderBounds }, // Empty board. Shared board gets ID of 0
+      sharedBoard: { id: createBoardID(0), placedCards: [], bounds: logicalBounds }, // Empty board. Shared board gets ID of 0
       players: players
     }
   },
@@ -114,9 +107,7 @@ export const StoryGame: Game<GameState> = {
           // Add card to new zone
           // package move into helper
 
-          newBoard.
-
-            G.sharedBoard = newBoard
+          G.sharedBoard = newBoard
 
           return;
         },

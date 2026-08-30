@@ -2,6 +2,8 @@
  * Position related
  */
 
+import { Board, LocalBoardPosition } from "./board";
+
 // --- Type definitions
 
 // origin is effectively top left, with width and height are bottom right
@@ -48,4 +50,43 @@ export function clampBoardPosition(pos: Position2D, bounds: BoardBounds): Positi
   }
 }
 
+/**
+ * Convert pixel position to local logical position
+ *  @param pixelPoint screen pixel point 
+ *  @param zoneRect the pixel screen zone's rectangle
+ *  @param bounds the logical zone's bounds
+ */
+export function pixelPosToLocal(
+  pixelPoint: { x: number; y: number },
+  zoneRect: { left: number; top: number; width: number; height: number },
+  bounds: BoardBounds
+): Position2D {
+  const relX = (pixelPoint.x - zoneRect.left) / zoneRect.width;
+  const relY = (pixelPoint.y - zoneRect.top) / zoneRect.height;
+  return {
+    x: bounds.origin.x + relX * bounds.width,
+    y: bounds.origin.y + relY * bounds.height,
+  };
+}
 
+/**
+ * Converts logical local position to position on board on screen
+ * 
+ * @param pos logical position
+ * @param bounds bounds of the logical rectangle
+ * @param dims screen space's rect's dimensions
+ * @returns CSS mapped variable names
+ */
+export function localPosToPixel(
+  pos: Position2D,
+  bounds: BoardBounds,
+  dims: { width: number; height: number }
+) {
+  const relX = (pos.x - bounds.origin.x) / bounds.width;
+  const relY = (pos.y - bounds.origin.y) / bounds.height;
+
+  return {
+    left: relX * dims.width,
+    top: relY * dims.height
+  }
+}

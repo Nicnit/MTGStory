@@ -5,6 +5,7 @@ import { UICard, LocalCard } from '../model/card'
 import Hand from './components/Hand';
 import cardData from '../data/card-pool.json';
 import { PHASES } from '../game/phases';
+import { resolveUICard } from '../model/card';
 import {
   DndContext,
   useSensor,
@@ -13,6 +14,8 @@ import {
   DragEndEvent,
   useDroppable
 } from '@dnd-kit/core'
+import BoardDropZone from './components/Board-Drop-Zone';
+import { pixelPosToLocal } from '@/model/geometry';
 
 // Global Variables and Constants
 
@@ -36,12 +39,18 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
 
   function handleDragEnd(event: DragEndEvent) {
     const { active: cardInfo, over: boardInfo } = event
-    if (!boardInfo) return;
-    if (boardInfo.id === 'board') {
-      if (cardInfo.data.current)
-        //const pos = // ??  TODO
-        moves.playCard({ G, playerID }, cardInfo.id,);
+    if (!boardInfo || boardInfo.id !== 'board') return;
+
+    const cardRect = cardInfo.rect.current.translated;
+    if (!cardRect) return
+
+    const cardCenter = {
+      x: cardRect.left + cardRect.width / 2,
+      y: cardRect.top + cardRect.height / 2
     }
+
+    const pos = pixelPosToLocal(cardCenter, boardInfo.rect, G.sharedBoard.bounds)
+    moves.playCard(cardInfo.id as string, pos);
   }
 
   return (
@@ -49,13 +58,17 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
       <div>
         <h2>Main Phase</h2>
         <pre>{JSON.stringify(G, null, 2)}</pre>
+
+        <BoardDropZone id="board" bounds={G.sharedBoard.bounds} placedCards={G.sharedBoard.placedCards} />
+
         <Hand
           cards={handCards}
         />
       </div >
     </DndContext>
   )
-};
+}
+
 
 /**
  * Handles switching between boards (if there are any to switch between)
@@ -87,7 +100,6 @@ export default App;
   * @param playerID - player who's hand to update
   * @return Cards in hand as UICards[]
   */
-
 function getHandFromGameState(G: GameState, playerID: string | null): UICard[] {
   if (!playerID || !G.players[playerID]) {
     return [];
@@ -96,13 +108,6 @@ function getHandFromGameState(G: GameState, playerID: string | null): UICard[] {
   const cardsInstances = G.players[playerID].secretHand.cards;
   // Return the cards as UICards given teh data from the hand.
   return cardsInstances.map(
-    cardInstance => {
-      const localCards = cardPool.find(localCard => localCard.id === cardInstance.scryfallID)
-      if (!localCards) return null;
-      return {
-        ...localCards,
-        instanceID: cardInstance.instanceID
-      };
-    }
-  ).filter(Boolean) as UICard[];
+    instance => resolveUICard(instance)
+  ).filter((c): c is UICard => c !== null)
 }

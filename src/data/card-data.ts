@@ -2,20 +2,20 @@ import { LocalCard } from '../model/card';
 import { CardType } from '../model/card-types';
 import cardPool from './card-pool.json';
 
-const cards = cardPool as LocalCard[];
+export const CARD_POOL = cardPool as LocalCard[];
 
 export function getRandomCard(type?: CardType): LocalCard {
-  let pool = cards;
+  let pool = CARD_POOL;
 
   if (type)
-    pool = cards.filter((card) => card.card_types.includes(type))
+    pool = CARD_POOL.filter((card) => card.card_types.includes(type))
 
   if (pool.length === 0) {
-    throw new Error(`No cards found for type: ${type}`);
+    throw new Error(`No CARD_POOL found for type: ${type}`);
   }
 
   const randomIndex = Math.floor(Math.random() * pool.length);
   return pool[randomIndex];
 }
 
-export default cards;
+export default CARD_POOL;

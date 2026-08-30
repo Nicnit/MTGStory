@@ -1,6 +1,7 @@
 import { CardType } from '../model/card-types';
 import { LocalBoardPosition } from './board';
 import { getRandomCard } from '@/data/card-data';
+import CARD_POOL from '@/data/card-data';
 
 // For board-related operations or types see ./board.ts
 
@@ -14,6 +15,16 @@ export interface LocalCard {
 }
 
 /**
+  * A card that will show in the UI via hand or board.
+  *
+  * instanceID distinguishes from other identical card copies.
+  */
+export interface UICard extends LocalCard {
+  instanceID: string;
+}
+
+
+/**
   * Holding relevant data from Scryfall. Only really used in getting cards script.
   */
 export interface ScryfallCard {
@@ -25,16 +36,9 @@ export interface ScryfallCard {
     normal?: string;
   };
 }
-
-/**
-  * A card that will show in the UI via hand or board.
-  *
-  * instanceID distinguishes from other identical card copies.
-  */
-export interface UICard extends LocalCard {
-  instanceID: string;
-}
-
+//
+//
+//
 // Could extend from ScryfallCard
 // Consider: assumes ownership stays consistent forever. Otherwise decoupling between card playerID
 // and hand playerID possible. Currently this allows convenience in accessing playerID
@@ -131,4 +135,18 @@ export function addCardToHand(card: CardInstance, hand: Hand): Hand {
 
   // Immutable addition
   return { cards: hand.cards.toSpliced(hand.cards.length, 0, card) }
+}
+
+
+/**
+ * Gets UICard given CardInstance
+ * @param cardInstance card instance to use scryfall id of
+ * @returns associated UICard, opr null if not associated scryfallID
+ */
+export function resolveUICard(cardInstance: CardInstance): UICard | null {
+  const localCard = CARD_POOL.find(c => c.id === cardInstance.scryfallID)
+  if (!localCard) return null;
+  const uiCard: UICard = { ...localCard, instanceID: cardInstance.instanceID }
+
+  return uiCard;
 }
