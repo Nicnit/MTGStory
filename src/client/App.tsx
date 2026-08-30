@@ -12,10 +12,15 @@ import {
   useSensors,
   PointerSensor,
   DragEndEvent,
-  useDroppable
+  useDroppable,
+  DragStartEvent,
+  DragOverlay
 } from '@dnd-kit/core'
 import BoardDropZone from './components/Board-Drop-Zone';
 import { pixelPosToLocal } from '@/model/geometry';
+import { useState } from 'react';
+import Card from './components/Card';
+import { PlacedCardInstance } from '../model/card';
 
 // Global Variables and Constants
 
@@ -23,11 +28,18 @@ const DRAG_DISTANCE_MIN = 1;
 
 const cardPool = cardData as LocalCard[];
 
+interface ActiveCardState {
+  activeCard: UICard, // Only track UICard, only for displaying
+  sourceState: number, // 0 if from hand, 1 if from board
+}
+
 // Boards
 
 
 const GlobalBoard = ({ G, playerID, moves }: any) => {
+  const [activeCardData, setActiveCard] = useState<ActiveCardState | null>(null); // for putting card in overlay, can then drag longer
   const handCards = getHandFromGameState(G, playerID);
+
   // Dnd-kit sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -37,9 +49,23 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
     }),
   )
 
+  function handleDragStart(event: DragStartEvent) {
+    const { active } = event
+    const foundCardBoard = G.sharedBoard.placedCards.find((c: PlacedCardInstance) => c.instanceID === active.id)
+    if (foundCardBoard !== null) {
+      // From Board, set to 1
+      // setActiveCard({ foundCardBoard, 1 }); TODO1
+    }
+
+    const foundCardHand = handCards.find((c) => c.instanceID === active.id)
+    // setActiveCard(foundCard ?? null) TODO1
+  }
+
   function handleDragEnd(event: DragEndEvent) {
-    const { active: cardInfo, over: boardInfo } = event
-    if (!boardInfo || boardInfo.id !== 'board') return;
+    setActiveCard(null)
+    // handle dragging over board
+    const { active: cardInfo, over } = event
+    if (!over || over.id !== 'board') return;
 
     const cardRect = cardInfo.rect.current.translated;
     if (!cardRect) return
@@ -49,22 +75,26 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
       y: cardRect.top + cardRect.height / 2
     }
 
-    const pos = pixelPosToLocal(cardCenter, boardInfo.rect, G.sharedBoard.bounds)
+    const pos = pixelPosToLocal(cardCenter, over.rect, G.sharedBoard.bounds)
     moves.playCard(cardInfo.id as string, pos);
   }
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div>
+
         <h2>Main Phase</h2>
         <pre>{JSON.stringify(G, null, 2)}</pre>
 
         <BoardDropZone id="board" bounds={G.sharedBoard.bounds} placedCards={G.sharedBoard.placedCards} />
+        <Hand cards={handCards} />
 
-        <Hand
-          cards={handCards}
-        />
       </div >
+      <DragOverlay>
+        {/* {activeCard ? (<Card id={activeCard.instanceID} name={activeCard.name} image={activeCard.image} />) */}
+        {/*   // Show the actively dragged card in drag overlay to extend drag distance. can add drag drop etc effect */}
+        {/*   : null} TODO1 */}
+      </DragOverlay>
     </DndContext>
   )
 }

@@ -10,13 +10,14 @@ interface CardProps {
 
 function Card({ id, name, image, onClick }: CardProps) {
   // Also iuncludes useDraggable
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+  const { isDragging, attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: id,
   })
 
   const style = {
     transform: CSS.Translate.toString(transform),   // Move the card to its dragged to position
     transition, // smooths the animation when reordering
+    opacity: isDragging ? 0 : 1, // If is dragging, hide while clone exists in DragOverlay
   }
 
 

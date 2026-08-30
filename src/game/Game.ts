@@ -113,7 +113,7 @@ export const StoryGame: Game<GameState> = {
         },
 
         /**
-        * Returns a new Board with an updated Card Position
+        * Updates sharedBoard to board with an updated Card Position
         * @param cardID - ID of card to move
         * @param board - Board with card to move
         * @param newPos - new position of the card
