@@ -19,7 +19,7 @@ import { pixelPosToLocal } from '@/model/geometry';
 
 // Global Variables and Constants
 
-const DRAG_DISTANCE_MIN = 5;
+const DRAG_DISTANCE_MIN = 1;
 
 const cardPool = cardData as LocalCard[];
 

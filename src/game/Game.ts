@@ -1,7 +1,7 @@
 import type { Game } from 'boardgame.io';
 import { CardInstance, drawCards, SecretHand } from '@/model/card';
 import { LocalBoardPosition, Board, moveCardInBoard, addCardToBoard, createBoardID } from '@/model/board';
-import { INVALID_MOVE } from 'boardgame.io/dist/types/src/core/constants';
+import { INVALID_MOVE } from 'boardgame.io/core'
 import { BoardBounds } from '@/model/geometry';
 
 const INITIAL_HAND_SIZE = 7;
