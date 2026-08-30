@@ -5,6 +5,8 @@ import CARD_POOL from '@/data/card-data';
 
 // For board-related operations or types see ./board.ts
 
+// LocalCard (Information) -> UICard(Unique ID) -> CardInstance(Ownership ID) -> PlacedCardInstance(Board Position)
+
 export interface LocalCard {
   id: string;
   name: string;
@@ -12,6 +14,7 @@ export interface LocalCard {
   card_types: CardType[];
   flavor: string;
   image: string;
+  scryfallID: string;
 }
 
 /**
@@ -21,6 +24,20 @@ export interface LocalCard {
   */
 export interface UICard extends LocalCard {
   instanceID: string;
+}
+
+// Could probably rename but too much work
+/**
+ * Used in Game.ts to track instances of cards in hands.
+ */
+export interface CardInstance extends UICard {
+  // instanceID: string; // Differentite between instances of the same card. Doesn't depend on scryfallID.
+  // scryfallID: string;
+  playerOwnerID: string;
+}
+
+export interface PlacedCardInstance extends CardInstance {
+  position: LocalBoardPosition
 }
 
 
@@ -36,28 +53,12 @@ export interface ScryfallCard {
     normal?: string;
   };
 }
-//
-//
-//
-// Could extend from ScryfallCard
-// Consider: assumes ownership stays consistent forever. Otherwise decoupling between card playerID
-// and hand playerID possible. Currently this allows convenience in accessing playerID
-/**
- * Used in Game.ts to track instances of cards in hands.
- */
-export interface CardInstance {
-  instanceID: string; // Differentite between instances of the same card. Doesn't depend on scryfallID.
-  scryfallID: string;
-  playerOwnerID: string;
-}
 
-export interface PlacedCardInstance extends CardInstance {
-  position: LocalBoardPosition
-}
+
 
 /**
  * used in Game.ts to track hands of players that others can't see.
- * TODO integrate with boardgame.io secret feature
+ * TODO integrate with boardgame.io secret cards feature
  */
 export interface Hand {
   cards: CardInstance[]
@@ -95,8 +96,8 @@ export function drawCards(hand: Hand, numCards: number, startID: number, playerI
   let nextHand: Hand = { cards: [...hand.cards] }
   for (let i = 0; i < numCards; i++) {
     nextHand = addCardToHand({
+      ...getRandomCard(),
       instanceID: makeCardInstanceID(startID++),
-      scryfallID: getRandomCard().id,
       playerOwnerID: playerID,
     }, nextHand)
   }
@@ -138,15 +139,21 @@ export function addCardToHand(card: CardInstance, hand: Hand): Hand {
 }
 
 
-/**
- * Gets UICard given CardInstance
- * @param cardInstance card instance to use scryfall id of
- * @returns associated UICard, opr null if not associated scryfallID
- */
-export function resolveUICard(cardInstance: CardInstance): UICard | null {
-  const localCard = CARD_POOL.find(c => c.id === cardInstance.scryfallID)
-  if (!localCard) return null;
-  const uiCard: UICard = { ...localCard, instanceID: cardInstance.instanceID }
 
-  return uiCard;
-}
+// --- Obsolete
+
+//
+// /**
+//  * Obsolete now, given UICard and CardInstance extension
+//  * Gets UICard given CardInstance
+//  * @param cardInstance card instance to use scryfall id of
+//  * @returns associated UICard, opr null if not associated scryfallID
+//  */
+// export function resolveUICard(cardInstance: CardInstance): UICard | null {
+//   const localCard = CARD_POOL.find(c => c.id === cardInstance.scryfallID)
+//   if (!localCard) return null;
+//   const uiCard: UICard = { ...localCard, instanceID: cardInstance.instanceID }
+//
+//   return uiCard;
+// }
+

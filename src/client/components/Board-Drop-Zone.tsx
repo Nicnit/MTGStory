@@ -2,7 +2,7 @@ import { useDroppable } from '@dnd-kit/core'
 import React, { useEffect, useRef, useState } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import { BoardBounds, localPosToPixel } from '@/model/geometry';
-import { PlacedCardInstance, resolveUICard } from '@/model/card';
+import { PlacedCardInstance, UICard } from '@/model/card';
 import Card from './Card';
 
 const isOverCol1: string = '#d0f0d0'
@@ -47,13 +47,12 @@ export default function BoardDropZone({ id, bounds, placedCards }: {
     >
       Drop Cards Here. width: {dimensions.width} |  height: {dimensions.height}
       {placedCards.map(card => {
-        const uiCard = resolveUICard(card) // Get name, img etc
-        if (!uiCard) return null;
+        if (!card) return null;
 
         const { left, top } = localPosToPixel(card.position, bounds, dimensions);
         return (
           <div key={card.instanceID} style={{ position: 'absolute', left, top }} /* absolute goes to nearest positioned, ie board*/>
-            <Card id={card.instanceID} name={uiCard.name} image={uiCard.image} />
+            <Card id={card.instanceID} name={card.name} image={card.image} />
           </div>
         );
       })}

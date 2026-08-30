@@ -3,6 +3,7 @@ import { CardInstance, drawCards, SecretHand } from '@/model/card';
 import { LocalBoardPosition, Board, moveCardInBoard, addCardToBoard, createBoardID } from '@/model/board';
 import { INVALID_MOVE } from 'boardgame.io/core'
 import { BoardBounds } from '@/model/geometry';
+import { cardHandToBoard } from '@/model/transfer';
 
 const INITIAL_HAND_SIZE = 7;
 
@@ -94,22 +95,13 @@ export const StoryGame: Game<GameState> = {
           if (!playerID || !G.players[playerID]) return INVALID_MOVE
 
           const board = G.sharedBoard // Make dynamic eventually?
-          const hand = G.players[playerID].secretHand.cards;
-          const cardIndex = hand.findIndex(card =>
-            card.instanceID === cardID)
-          if (cardIndex === -1) return INVALID_MOVE
+          const hand = G.players[playerID].secretHand
 
-          const [removedCard]: CardInstance[] = hand.splice(cardIndex, 1)
+          const newState = cardHandToBoard(cardID, hand, board, pos)
+          if (newState === null) return; // Card ID missed
 
-          const newBoard: Board = addCardToBoard(removedCard, board, pos)
-
-          // TODONOW work on coordinates (after workign on bounds)
-          // Add card to new zone
-          // package move into helper
-
-          G.sharedBoard = newBoard
-
-          return;
+          G.players[playerID].secretHand = { ...newState.hand, playerID }
+          G.sharedBoard = newState.board
         },
 
         /**

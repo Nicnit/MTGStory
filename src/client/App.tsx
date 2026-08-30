@@ -1,11 +1,9 @@
 import { Client } from 'boardgame.io/react';
 import { StoryGame, GameState } from '../game/Game';
 import { Local } from 'boardgame.io/multiplayer';
-import { UICard, LocalCard } from '../model/card'
+import { UICard, LocalCard, CardInstance } from '../model/card'
 import Hand from './components/Hand';
 import cardData from '../data/card-pool.json';
-import { PHASES } from '../game/phases';
-import { resolveUICard } from '../model/card';
 import {
   DndContext,
   useSensor,
@@ -19,7 +17,6 @@ import {
 import BoardDropZone from './components/Board-Drop-Zone';
 import { pixelPosToLocal } from '@/model/geometry';
 import { useState } from 'react';
-import Card from './components/Card';
 import { PlacedCardInstance } from '../model/card';
 
 // Global Variables and Constants
@@ -38,7 +35,7 @@ interface ActiveCardState {
 
 const GlobalBoard = ({ G, playerID, moves }: any) => {
   const [activeCardData, setActiveCard] = useState<ActiveCardState | null>(null); // for putting card in overlay, can then drag longer
-  const handCards = getHandFromGameState(G, playerID);
+  const handCards: CardInstance[] = G.players[playerID].secretHand.cards
 
   // Dnd-kit sensors
   const sensors = useSensors(
@@ -57,7 +54,7 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
       // setActiveCard({ foundCardBoard, 1 }); TODO1
     }
 
-    const foundCardHand = handCards.find((c) => c.instanceID === active.id)
+    const foundCardHand = handCards.find((c: CardInstance) => c.instanceID === active.id)
     // setActiveCard(foundCard ?? null) TODO1
   }
 
@@ -122,22 +119,27 @@ const App = Client({
 export default App;
 
 // Other Helpers
-
-/**
-  * Adaption layer between GameState { instanceID, scryfallID } and LocalCard from Scryfall
-  *
-  * @param gamestate - gamestate
-  * @param playerID - player who's hand to update
-  * @return Cards in hand as UICards[]
-  */
-function getHandFromGameState(G: GameState, playerID: string | null): UICard[] {
-  if (!playerID || !G.players[playerID]) {
-    return [];
-  }
-
-  const cardsInstances = G.players[playerID].secretHand.cards;
-  // Return the cards as UICards given teh data from the hand.
-  return cardsInstances.map(
-    instance => resolveUICard(instance)
-  ).filter((c): c is UICard => c !== null)
-}
+//
+//
+//
+//
+// Obsolete given UICard and CardInstance extendability
+//
+// /**
+//   * Adaption layer between GameState { instanceID, scryfallID } and LocalCard from Scryfall
+//   *
+//   * @param gamestate - gamestate
+//   * @param playerID - player who's hand to update
+//   * @return Cards in hand as UICards[]
+//   */
+// function getHandFromGameState(G: GameState, playerID: string | null): UICard[] {
+//   if (!playerID || !G.players[playerID]) {
+//     return [];
+//   }
+//
+//   const cardsInstances = G.players[playerID].secretHand.cards;
+//   // Return the cards as UICards given teh data from the hand.
+//   return cardsInstances.map(
+//     instance => resolveUICard(instance)
+//   ).filter((c): c is UICard => c !== null)
+// }
