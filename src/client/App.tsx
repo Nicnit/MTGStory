@@ -18,6 +18,7 @@ import BoardDropZone from './components/Board-Drop-Zone';
 import { pixelPosToLocal } from '@/model/geometry';
 import { useState } from 'react';
 import { PlacedCardInstance } from '../model/card';
+import Card from './components/Card';
 
 // Global Variables and Constants
 
@@ -27,7 +28,7 @@ const cardPool = cardData as LocalCard[];
 
 interface ActiveCardState {
   activeCard: UICard, // Only track UICard, only for displaying
-  sourceState: number, // 0 if from hand, 1 if from board
+  sourceState: 'hand' | 'board' // where it is coming from
 }
 
 // Boards
@@ -48,32 +49,66 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
 
   function handleDragStart(event: DragStartEvent) {
     const { active } = event
-    const foundCardBoard = G.sharedBoard.placedCards.find((c: PlacedCardInstance) => c.instanceID === active.id)
-    if (foundCardBoard !== null) {
-      // From Board, set to 1
-      // setActiveCard({ foundCardBoard, 1 }); TODO1
-    }
+    const foundCardInHand = handCards.find((c: UICard) => event.active.id === c.id)
+    const foundCardInBoard: PlacedCardInstance = G.sharedBoard.placedCards.find((c: PlacedCardInstance) => c.instanceID === active.id)
 
-    const foundCardHand = handCards.find((c: CardInstance) => c.instanceID === active.id)
-    // setActiveCard(foundCard ?? null) TODO1
+    if (!foundCardInHand && !foundCardInBoard) return; // can't find the card
+
+    if (foundCardInBoard) {
+      if (foundCardInBoard.playerOwnerID !== playerID) return // not owned by this player, do not drag (DRAGSETTING)
+      setActiveCard({ activeCard: foundCardInBoard, sourceState: 'board' });
+      return;
+    } else if (foundCardInHand) {
+      // implicit ownership in hand
+      // if (foundCardInHand.playerOwnerID !== playerID) return // not owned by this player 
+      setActiveCard({ activeCard: foundCardInHand, sourceState: 'hand' })
+    }
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    setActiveCard(null)
-    // handle dragging over board
     const { active: cardInfo, over } = event
-    if (!over || over.id !== 'board') return;
+    if (!cardInfo || !over || !activeCardData) return;
+    let source;
+    if (activeCardData.activeCard.instanceID !== cardInfo.id) {
+      // independently find source if not already known via ActiveCardState. for edge cases. a bit sloppy
+      source = G.sharedBoard.placedCards.find((c: PlacedCardInstance) => c.instanceID === activeCardData.activeCard.instanceID)
+        ? 'board' : 'hand' // set src to board if card found in board, otherwise set to hand.
+    } else {
+      source = activeCardData.sourceState
+    }
 
+    // Card pixel location
     const cardRect = cardInfo.rect.current.translated;
     if (!cardRect) return
-
     const cardCenter = {
       x: cardRect.left + cardRect.width / 2,
       y: cardRect.top + cardRect.height / 2
     }
 
-    const pos = pixelPosToLocal(cardCenter, over.rect, G.sharedBoard.bounds)
-    moves.playCard(cardInfo.id as string, pos);
+
+
+    if (over.id === "board") {
+      //handle if from board
+      const pos = pixelPosToLocal(cardCenter, over.rect, G.sharedBoard.bounds)
+      if (source === 'board') {
+        moves.moveCard(cardInfo.id as string, pos)
+      }
+      //handle if from hand
+      else if (source === 'hand') {
+        moves.playCard(cardInfo.id as string, pos)
+      }
+    }
+    else if (over.id === "hand") {
+      // Don't need position to place in hand (unless ordering? TODO2 - ordering in hand)
+      if (source === 'board') {
+        moves.pickUpCard(cardInfo.id as string)
+      }
+      else if (source === 'hand') {
+        // do nothing, reorder?
+      }
+    }
+
+    setActiveCard(null)
   }
 
   return (
@@ -88,9 +123,9 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
 
       </div >
       <DragOverlay>
-        {/* {activeCard ? (<Card id={activeCard.instanceID} name={activeCard.name} image={activeCard.image} />) */}
-        {/*   // Show the actively dragged card in drag overlay to extend drag distance. can add drag drop etc effect */}
-        {/*   : null} TODO1 */}
+        {activeCardData?.activeCard ? (<Card id={activeCardData.activeCard.instanceID} name={activeCardData.activeCard.name} image={activeCardData.activeCard.image} />)
+          // Show the actively dragged card in drag overlay to extend drag distance. can add drag drop etc effect
+          : null}
       </DragOverlay>
     </DndContext>
   )

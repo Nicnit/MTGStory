@@ -2,8 +2,8 @@ import type { Game } from 'boardgame.io';
 import { CardInstance, drawCards, SecretHand } from '@/model/card';
 import { LocalBoardPosition, Board, moveCardInBoard, addCardToBoard, createBoardID } from '@/model/board';
 import { INVALID_MOVE } from 'boardgame.io/core'
-import { BoardBounds } from '@/model/geometry';
-import { cardHandToBoard } from '@/model/transfer';
+import { BoardBounds, Position2D } from '@/model/geometry';
+import { cardBoardToHand, cardHandToBoard } from '@/model/transfer';
 
 const INITIAL_HAND_SIZE = 7;
 
@@ -89,7 +89,7 @@ export const StoryGame: Game<GameState> = {
         playCard: (
           { G, playerID },
           cardID: string,
-          pos: LocalBoardPosition
+          pos: Position2D // board is the shared board (for now, might change hjere)
         ) => {
           // Move card from that hand into new zone
           if (!playerID || !G.players[playerID]) return INVALID_MOVE
@@ -98,7 +98,7 @@ export const StoryGame: Game<GameState> = {
           const hand = G.players[playerID].secretHand
 
           const newState = cardHandToBoard(cardID, hand, board, pos)
-          if (newState === null) return; // Card ID missed
+          if (newState === null) return INVALID_MOVE; // Card ID missed
 
           G.players[playerID].secretHand = { ...newState.hand, playerID }
           G.sharedBoard = newState.board
@@ -122,7 +122,27 @@ export const StoryGame: Game<GameState> = {
           if (newBoard === null) return INVALID_MOVE
           G.sharedBoard = newBoard
           return;
+        },
+
+        /**
+         *  Pick a card up from a board into the player's hand hand
+         *  @param cardID card's ID to pick from board into hand
+         */
+        pickUpCard: (
+          { G, playerID },
+          cardID: string,
+        ) => {
+          if (!playerID || !G.players[playerID]) return INVALID_MOVE
+          const foundCard = G.players[playerID].secretHand.cards.find((c) => c.instanceID === cardID)
+          if (!foundCard) return INVALID_MOVE // Check that the card is owned by the player. If not, do not let them pick up. DRAGSETTING
+
+          const newInfo = cardBoardToHand(cardID, G.sharedBoard, G.players[playerID].secretHand)
+          if (!newInfo) return INVALID_MOVE
+
+          G.sharedBoard = newInfo.board
+          G.players[playerID].secretHand = { ...newInfo.hand, playerID }
         }
+
       },
     },
   },

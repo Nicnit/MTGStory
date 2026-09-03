@@ -1,7 +1,6 @@
 import { CardType } from '../model/card-types';
 import { LocalBoardPosition } from './board';
 import { getRandomCard } from '@/data/card-data';
-import CARD_POOL from '@/data/card-data';
 
 // For board-related operations or types see ./board.ts
 

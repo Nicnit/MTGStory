@@ -46,6 +46,7 @@ export default function BoardDropZone({ id, bounds, placedCards }: {
       style={{ position: 'relative', background: isOver ? isOverCol1 : isOverCol2 }}
     >
       Drop Cards Here. width: {dimensions.width} |  height: {dimensions.height}
+
       {placedCards.map(card => {
         if (!card) return null;
 

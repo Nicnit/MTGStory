@@ -8,7 +8,7 @@ import { Position2D, isValidPosition, clampBoardPosition } from "./geometry"
  * @param hand hand to add card to
  * @param board board to remove card from
  * @param position position to add the card at
- * @returns an updated new board and hand, or undefined if card is missing
+ * @returns an updated new board and hand, or null if card is missing
  */
 export function cardHandToBoard(cardID: string, hand: Hand, board: Board, pos: Position2D): { hand: Hand, board: Board } | null {
   const card = hand.cards.find(card => card.instanceID === cardID)
@@ -25,7 +25,7 @@ export function cardHandToBoard(cardID: string, hand: Hand, board: Board, pos: P
  * @param cardID card to move by ID
  * @param board board to remove card from
  * @param hand hand to add card to
- * @returns an updated new board and hand
+ * @returns an updated new board and hand, or null if no placed card found by ID
  */
 export function cardBoardToHand(cardID: string, board: Board, hand: Hand): { board: Board, hand: Hand } | null {
   const placedCard = board.placedCards.find(card => card.instanceID === cardID)
