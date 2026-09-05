@@ -35,6 +35,15 @@ export interface CardInstance extends UICard {
   playerOwnerID: string;
 }
 
+/**
+ * number is left/right position, determines hand order
+ */
+export interface HandCardInstance extends CardInstance {
+  xPosition: number
+}
+
+/**
+ */
 export interface PlacedCardInstance extends CardInstance {
   position: LocalBoardPosition
 }
@@ -60,7 +69,7 @@ export interface ScryfallCard {
  * TODO integrate with boardgame.io secret cards feature
  */
 export interface Hand {
-  cards: CardInstance[]
+  cards: HandCardInstance[]
 }
 
 export interface SecretHand extends Hand {
@@ -89,7 +98,7 @@ function makeCardInstanceID(instanceID: number): string {
  * @param playerID player to assign ownership of cards to
  * @returns new cardInstances array for a Hand, and next card ID MUST be passed to startID
  */
-export function drawCards(hand: Hand, numCards: number, startID: number, playerID: string): { cards: CardInstance[], nextID: number } {
+export function drawCards(hand: Hand, numCards: number, startID: number, playerID: string): { cards: HandCardInstance[], nextID: number } {
   // playerID as argument probly not necessary, could just use SecretHand
   // but might have different hand types in future
   let nextHand: Hand = { cards: [...hand.cards] }
@@ -98,6 +107,7 @@ export function drawCards(hand: Hand, numCards: number, startID: number, playerI
       ...getRandomCard(),
       instanceID: makeCardInstanceID(startID++),
       playerOwnerID: playerID,
+      xPosition: 0 // sorts by utf or something
     }, nextHand)
   }
 
@@ -129,7 +139,7 @@ export function removeCardFromHand(hand: Hand, cardID: string): Hand {
  * @param hand Hand to base off of
  * @returns new hand with new card
  */
-export function addCardToHand(card: CardInstance, hand: Hand): Hand {
+export function addCardToHand(card: HandCardInstance, hand: Hand): Hand {
   // CHeck for matching playerID for continuity?
   // Handsize check?
 

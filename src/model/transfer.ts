@@ -1,6 +1,7 @@
 import { Hand, removeCardFromHand, addCardToHand } from "./card"
 import { Board, addCardToBoard, removeCardFromBoard } from "./board"
 import { Position2D, isValidPosition, clampBoardPosition } from "./geometry"
+import { HandCardInstance } from "./card"
 
 /**
  * Return new board and hand after removing the card by ID from the hand and adding it to board at a position
@@ -24,15 +25,17 @@ export function cardHandToBoard(cardID: string, hand: Hand, board: Board, pos: P
  * Return new board and hand after removing the card by ID from the board and adding it to hand
  * @param cardID card to move by ID
  * @param board board to remove card from
+ * @param xPosition for determining order in hand via x coord
  * @param hand hand to add card to
  * @returns an updated new board and hand, or null if no placed card found by ID
  */
-export function cardBoardToHand(cardID: string, board: Board, hand: Hand): { board: Board, hand: Hand } | null {
+export function cardBoardToHand(cardID: string, board: Board, xPosition: number, hand: Hand): { board: Board, hand: Hand } | null {
   const placedCard = board.placedCards.find(card => card.instanceID === cardID)
   if (placedCard === undefined) return null
   const { position: pos, ...card } = placedCard // Destructure out the position. Explicitly make into cardInstance
+  const handCard: HandCardInstance = { ...placedCard, xPosition }
 
-  const newHand: Hand = addCardToHand(card, hand)
+  const newHand: Hand = addCardToHand(handCard, hand)
   const newBoard: Board = removeCardFromBoard(cardID, board)
   return { board: newBoard, hand: newHand }
 }

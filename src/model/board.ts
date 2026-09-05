@@ -3,8 +3,6 @@ import { Position2D, BoardBounds, isValidPosition, clampBoardPosition } from "./
 
 const BOARD_ID_PREPEND = "board-"; // what to prepend before the board ID, in createBoardID
 
-
-
 export interface Board {
   id: string,
   placedCards: PlacedCardInstance[],

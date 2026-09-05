@@ -1,5 +1,5 @@
 import type { Game } from 'boardgame.io';
-import { CardInstance, drawCards, SecretHand } from '@/model/card';
+import { CardInstance, drawCards, removeCardFromHand, SecretHand } from '@/model/card';
 import { LocalBoardPosition, Board, moveCardInBoard, addCardToBoard, createBoardID } from '@/model/board';
 import { INVALID_MOVE } from 'boardgame.io/core'
 import { BoardBounds, Position2D } from '@/model/geometry';
@@ -131,16 +131,36 @@ export const StoryGame: Game<GameState> = {
         pickUpCard: (
           { G, playerID },
           cardID: string,
+          xPos: number
         ) => {
           if (!playerID || !G.players[playerID]) return INVALID_MOVE
           const foundCard = G.players[playerID].secretHand.cards.find((c) => c.instanceID === cardID)
           if (!foundCard) return INVALID_MOVE // Check that the card is owned by the player. If not, do not let them pick up. DRAGSETTING
 
-          const newInfo = cardBoardToHand(cardID, G.sharedBoard, G.players[playerID].secretHand)
+          const newInfo = cardBoardToHand(cardID, G.sharedBoard, xPos, G.players[playerID].secretHand)
           if (!newInfo) return INVALID_MOVE
 
           G.sharedBoard = newInfo.board
           G.players[playerID].secretHand = { ...newInfo.hand, playerID }
+        },
+
+        /**
+        * Update position of a card, potentially reordering it
+        * @param cardID id of card to update position of. it will then reorder.
+        * @param xPos cards new position
+        */
+        moveCardInHand: (
+          { G, playerID },
+          cardID: string,
+          xPosition: number
+        ) => {
+          if (!playerID || !G.players[playerID]) return INVALID_MOVE
+          const hand = G.players[playerID].secretHand
+          const foundCard = hand.cards.find((c) => c.instanceID === cardID)
+          if (!foundCard) return INVALID_MOVE
+
+          const newCard = { ...foundCard, xPosition }
+          G.players[playerID].secretHand = { ...removeCardFromHand(hand, cardID), playerID }
         }
 
       },

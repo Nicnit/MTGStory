@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import Card from './Card';
-import { LocalCard, PlacedCardInstance } from '../../model/card';
+import { HandCardInstance, LocalCard, PlacedCardInstance } from '../../model/card';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
-import { UICard } from '../../model/card';
-import { useDraggable } from '@dnd-kit/core'
 
 interface HandProps {
-  cards: PlacedCardInstance[] // Track the "position" of just x to find the order
+  cards: HandCardInstance[] // Track the "position" of just x to find the order
 }
 /**
   * Handles cards in the hand and editing of their text
@@ -35,16 +33,19 @@ function Hand({ cards }: HandProps) {
     >
       <div className="hand">
         {
-          // sort the cards here to do so in real time
-          cards.map((card) => (
-            <Card
-              key={card.instanceID}
-              id={card.instanceID}
-              name={card.name}
-              image={card.image}
-              onClick={() => handleCardClick(card)}
-            />
-          ))}
+          // sort the cards here according ot current position
+          [...cards]
+            .sort((a, b) => a.xPosition - b.xPosition)
+            .map((card) => (
+              <Card
+                key={card.instanceID}
+                id={card.instanceID}
+                name={card.name}
+                image={card.image}
+                onClick={() => handleCardClick(card)}
+              />
+            ))
+        }
       </div>
     </SortableContext>
   );

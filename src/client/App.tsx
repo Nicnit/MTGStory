@@ -1,7 +1,7 @@
 import { Client } from 'boardgame.io/react';
 import { StoryGame, GameState } from '../game/Game';
 import { Local } from 'boardgame.io/multiplayer';
-import { UICard, LocalCard, CardInstance } from '../model/card'
+import { UICard, LocalCard, CardInstance, HandCardInstance } from '../model/card'
 import Hand from './components/Hand';
 import cardData from '../data/card-pool.json';
 import {
@@ -36,7 +36,7 @@ interface ActiveCardState {
 
 const GlobalBoard = ({ G, playerID, moves }: any) => {
   const [activeCardData, setActiveCard] = useState<ActiveCardState | null>(null); // for putting card in overlay, can then drag longer
-  const handCards: CardInstance[] = G.players[playerID].secretHand.cards
+  const handCards: HandCardInstance[] = G.players[playerID].secretHand.cards
 
   // Dnd-kit sensors
   const sensors = useSensors(
@@ -89,19 +89,20 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
 
     if (over.id === "board") {
       //handle if from board
-      const pos = pixelPosToLocal(cardCenter, over.rect, G.sharedBoard.bounds)
+      const boardPos = pixelPosToLocal(cardCenter, over.rect, G.sharedBoard.bounds)
       if (source === 'board') {
-        moves.moveCard(cardInfo.id as string, pos)
+        moves.moveCard(cardInfo.id as string, boardPos)
       }
       //handle if from hand
       else if (source === 'hand') {
-        moves.playCard(cardInfo.id as string, pos)
+        moves.playCard(cardInfo.id as string, boardPos)
       }
     }
     else if (over.id === "hand") {
-      // Don't need position to place in hand (unless ordering? TODO2 - ordering in hand)
+      // get position to sort within hand. position should be consistent enough to not require recalculations of older positions
+      const screenPos = cardCenter
       if (source === 'board') {
-        moves.pickUpCard(cardInfo.id as string)
+        moves.pickUpCard(cardInfo.id as string, screenPos.x)
       }
       else if (source === 'hand') {
         // do nothing, reorder?
@@ -153,10 +154,11 @@ const App = Client({
 
 export default App;
 
+
+
+
+
 // Other Helpers
-//
-//
-//
 //
 // Obsolete given UICard and CardInstance extendability
 //
