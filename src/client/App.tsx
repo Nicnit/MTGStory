@@ -19,6 +19,7 @@ import { pixelPosToLocal } from '@/model/geometry';
 import { useState } from 'react';
 import { PlacedCardInstance } from '../model/card';
 import Card from './components/Card';
+import { PlayerState } from '../game/Game';
 
 // Global Variables and Constants
 
@@ -36,9 +37,8 @@ interface ActiveCardState {
 
 const GlobalBoard = ({ G, playerID, moves }: any) => {
   const [activeCardData, setActiveCard] = useState<ActiveCardState | null>(null); // for putting card in overlay, can then drag longer
-  const handCards: HandCardInstance[] = G.players[playerID].secretHand.cards
 
-  // Dnd-kit sensors
+  // Dnd-kit sensors, run hooks
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -47,10 +47,16 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
     }),
   )
 
+  const playerState = G.players[playerID];
+  if (!playerState) return <p>invalid playerState (playerID of {playerID})</p>// invalid ID
+  const handCards: HandCardInstance[] = playerState.secretHand.cards
+
+
   function handleDragStart(event: DragStartEvent) {
     const { active } = event
-    const foundCardInHand = handCards.find((c: UICard) => event.active.id === c.id)
-    const foundCardInBoard: PlacedCardInstance = G.sharedBoard.placedCards.find((c: PlacedCardInstance) => c.instanceID === active.id)
+    const foundCardInHand = handCards.find((c: UICard) => event.active.id === c.instanceID)
+    const foundCardInBoard: PlacedCardInstance = G.sharedBoard.placedCards.find(
+      (c: PlacedCardInstance) => c.instanceID === active.id)
 
     if (!foundCardInHand && !foundCardInBoard) return; // can't find the card
 
@@ -67,7 +73,7 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
 
   function handleDragEnd(event: DragEndEvent) {
     const { active: cardInfo, over } = event
-    if (!cardInfo || !over || !activeCardData) return;
+    if (!cardInfo || !over || !activeCardData) { setActiveCard(null); return }
     let source;
     if (activeCardData.activeCard.instanceID !== cardInfo.id) {
       // independently find source if not already known via ActiveCardState. for edge cases. a bit sloppy

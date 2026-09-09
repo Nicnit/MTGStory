@@ -33,3 +33,6 @@ npm-debug.log*
 
 # Test
 coverage/
+
+# Misc, keys, etc
+.misc/

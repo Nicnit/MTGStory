@@ -4,12 +4,14 @@ import { LocalBoardPosition, Board, moveCardInBoard, addCardToBoard, createBoard
 import { INVALID_MOVE } from 'boardgame.io/core'
 import { BoardBounds, Position2D } from '@/model/geometry';
 import { cardBoardToHand, cardHandToBoard } from '@/model/transfer';
+import { createPlayerID } from '@/model/board';
 
 const INITIAL_HAND_SIZE = 7;
 
-type PlayerState = {
+export type PlayerState = {
   secretHand: SecretHand;
   turnsTaken: number;
+  playerID: string;
   // Other player stats
 }
 
@@ -31,7 +33,8 @@ export const StoryGame: Game<GameState> = {
 
       players[String(i)] = {
         secretHand: hand,
-        turnsTaken: 0
+        turnsTaken: 0,
+        playerID: createPlayerID(i)
       }
     }
 

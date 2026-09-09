@@ -7,7 +7,7 @@ import { getRandomCard } from '@/data/card-data';
 // LocalCard (Information) -> UICard(Unique ID) -> CardInstance(Ownership ID) -> PlacedCardInstance(Board Position)
 
 export interface LocalCard {
-  id: string;
+  scryfall_id: string;
   name: string;
   type_line: string;
   card_types: CardType[];

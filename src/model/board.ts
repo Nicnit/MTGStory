@@ -2,6 +2,8 @@ import { CardInstance, PlacedCardInstance, removeCardFromHand } from "./card";
 import { Position2D, BoardBounds, isValidPosition, clampBoardPosition } from "./geometry";
 
 const BOARD_ID_PREPEND = "board-"; // what to prepend before the board ID, in createBoardID
+const MATCH_ID_PREPEND = "match-"
+const PLAYER_ID_PREPEND = "" // boardgame.io requires "0" "1" etc... player IDs
 
 export interface Board {
   id: string,
@@ -88,4 +90,17 @@ export function removeCardFromBoard(cardID: string, board: Board): Board {
  */
 export function createBoardID(IDnumber: number) {
   return BOARD_ID_PREPEND + IDnumber.toString();
+}
+
+/**
+ * Create match id. notably, no way to track match IDs yet TODO
+ */
+export function createMatchID(IDnumber: number) {
+  return MATCH_ID_PREPEND + IDnumber.toString();
+}
+/**
+ * Create match id. notably, no way to track match IDs yet TODO
+ */
+export function createPlayerID(IDnumber: number) {
+  return PLAYER_ID_PREPEND + IDnumber.toString();
 }
