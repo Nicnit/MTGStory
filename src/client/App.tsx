@@ -60,11 +60,13 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
 
     if (!foundCardInHand && !foundCardInBoard) return; // can't find the card
 
-    if (foundCardInBoard) {
-      if (foundCardInBoard.playerOwnerID !== playerID) return // not owned by this player, do not drag (DRAGSETTING)
-      setActiveCard({ activeCard: foundCardInBoard, sourceState: 'board' });
-      return;
-    } else if (foundCardInHand) {
+    // let any plater lift cared, not necessarily chasnge position
+    // if (foundCardInBoard) {
+    //   if (foundCardInBoard.playerOwnerID !== playerID) return // not owned by this player, do not drag (DRAGSETTING)
+    //   setActiveCard({ activeCard: foundCardInBoard, sourceState: 'board' });
+    //   return;
+    // } else 
+    if (foundCardInHand) {
       // implicit ownership in hand
       // if (foundCardInHand.playerOwnerID !== playerID) return // not owned by this player 
       setActiveCard({ activeCard: foundCardInHand, sourceState: 'hand' })
@@ -82,22 +84,25 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
     } else {
       source = activeCardData.sourceState
     }
+    console.log('drag end', { over: over?.id, source, active: cardInfo.id })
 
     // Card pixel location
     const cardRect = cardInfo.rect.current.translated;
-    if (!cardRect) return
+    if (!cardRect) { setActiveCard(null); return }
     const cardCenter = {
       x: cardRect.left + cardRect.width / 2,
       y: cardRect.top + cardRect.height / 2
     }
 
 
-
     if (over.id === "board") {
       //handle if from board
       const boardPos = pixelPosToLocal(cardCenter, over.rect, G.sharedBoard.bounds)
       if (source === 'board') {
-        moves.moveCard(cardInfo.id as string, boardPos)
+        // Check player ownership before updating location
+        const placed = G.sharedBoard.placedCard.find((c: PlacedCardInstance) => c.instanceID === cardInfo.id)
+        if (placed?.playerOwnerID === playerID)
+          moves.moveCard(cardInfo.id as string, boardPos)
       }
       //handle if from hand
       else if (source === 'hand') {
@@ -108,7 +113,9 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
       // get position to sort within hand. position should be consistent enough to not require recalculations of older positions
       const screenPos = cardCenter
       if (source === 'board') {
-        moves.pickUpCard(cardInfo.id as string, screenPos.x)
+        const placed = G.sharedBoard.placedCard.find((c: PlacedCardInstance) => c.instanceID === cardInfo.id)
+        if (placed?.playerOwnerID === playerID)
+          moves.pickUpCard(cardInfo.id as string, screenPos.x)
       }
       else if (source === 'hand') {
         // do nothing, reorder?
@@ -119,19 +126,29 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
   }
 
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={() => setActiveCard(null)}
+    >
       <div>
 
         <h2>Main Phase</h2>
         <pre>{JSON.stringify(G, null, 2)}</pre>
 
-        <BoardDropZone id="board" bounds={G.sharedBoard.bounds} placedCards={G.sharedBoard.placedCards} />
+        <BoardDropZone
+          id="board"
+          bounds={G.sharedBoard.bounds}
+          placedCards={G.sharedBoard.placedCards}
+          activeCardData={activeCardData ? activeCardData.activeCard : null} />
         <Hand cards={handCards} />
 
       </div >
       <DragOverlay>
-        {activeCardData?.activeCard ? (<Card id={activeCardData.activeCard.instanceID} name={activeCardData.activeCard.name} image={activeCardData.activeCard.image} />)
+        {activeCardData?.activeCard ? (<Card name={activeCardData.activeCard.name} image={activeCardData.activeCard.image} />)
           // Show the actively dragged card in drag overlay to extend drag distance. can add drag drop etc effect
+          // Use raw Card to only show Image- not use hooks unnecessarily
           : null}
       </DragOverlay>
     </DndContext>

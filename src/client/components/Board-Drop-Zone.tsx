@@ -1,17 +1,19 @@
-import { useDroppable } from '@dnd-kit/core'
+import { useDraggable, useDroppable } from '@dnd-kit/core'
 import React, { useEffect, useRef, useState } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import { BoardBounds, localPosToPixel } from '@/model/geometry';
 import { PlacedCardInstance, UICard } from '@/model/card';
 import Card from './Card';
+import { CSS } from '@dnd-kit/utilities';
 
 const isOverCol1: string = '#d0f0d0'
 const isOverCol2: string = '#f0f0f0'
 
-export default function BoardDropZone({ id, bounds, placedCards }: {
+export default function BoardDropZone({ id, bounds, placedCards, activeCardData }: {
   id: string;
   bounds: BoardBounds;
-  placedCards: PlacedCardInstance[]
+  placedCards: PlacedCardInstance[],
+  activeCardData: UICard | null
 }) {
   const { setNodeRef, isOver } = useDroppable({ id });
 
@@ -53,10 +55,28 @@ export default function BoardDropZone({ id, bounds, placedCards }: {
         const { left, top } = localPosToPixel(card.position, bounds, dimensions);
         return (
           <div key={card.instanceID} style={{ position: 'absolute', left, top }} /* absolute goes to nearest positioned, ie board*/>
-            <Card id={card.instanceID} name={card.name} image={card.image} />
+            <DraggableBoardCard id={card.instanceID} name={card.name} image={card.image} activeCardData={activeCardData} />
           </div>
         );
       })}
     </div >
+  )
+}
+
+
+function DraggableBoardCard({ id, name, image, activeCardData }: {
+  id: string; name: string; image: string; activeCardData: UICard | null
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id })
+  let opacity = 1
+  if (activeCardData && id === activeCardData.instanceID) { opacity = 0 }
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    opacity: opacity
+  }
+  return (
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
+      <Card name={name} image={image} />
+    </div>
   )
 }

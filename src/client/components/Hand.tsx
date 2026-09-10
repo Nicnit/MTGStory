@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Card from './Card';
 import { HandCardInstance, LocalCard, PlacedCardInstance } from '../../model/card';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface HandProps {
   cards: HandCardInstance[] // Track the "position" of just x to find the order
@@ -16,16 +17,14 @@ function Hand({ cards }: HandProps) {
 
   // atm obsolete
   const handleCardClick = (card: LocalCard) => {
-    if (selectedCard?.id === card.id) { // Deselects the card
+    if (selectedCard?.scryfall_id === card.scryfall_id) { // Deselects the card
       setSelectedCard(null);
     } else {
       setSelectedCard(card);
     }
   };
 
-
-  // TODO make cards in hand draggable, reorderable by dragging.
-  // TODO make cards in hand drop on baord when draged enough
+  // TODO make cards in hand reorderable by dragging.
 
   return (
     <SortableContext
@@ -37,7 +36,7 @@ function Hand({ cards }: HandProps) {
           [...cards]
             .sort((a, b) => a.xPosition - b.xPosition)
             .map((card) => (
-              <Card
+              <SortableHandCard
                 key={card.instanceID}
                 id={card.instanceID}
                 name={card.name}
@@ -50,5 +49,26 @@ function Hand({ cards }: HandProps) {
     </SortableContext>
   );
 }
+
+// Wrapper around Card
+function SortableHandCard({ id, name, image, onClick }: {
+  id: string; name: string; image: string; onClick?: () => void
+}) {
+  const { isDragging, attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id })
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+    opacity: isDragging ? 0 : 1,
+  }
+  return (
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="hand-card" onClick={onClick}>
+      <Card name={name} image={image} /> {/*Wrap around here*/}
+    </div>
+  )
+}
+
+
+
 
 export default Hand;
