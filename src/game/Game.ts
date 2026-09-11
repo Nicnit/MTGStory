@@ -7,6 +7,7 @@ import { cardBoardToHand, cardHandToBoard } from '@/model/transfer';
 import { createPlayerID } from '@/model/board';
 
 const INITIAL_HAND_SIZE = 7;
+export const BOARD_DIMENSIONS_LOGICAL = [1000, 1000] // width, height respectively
 
 export type PlayerState = {
   secretHand: SecretHand;
@@ -39,7 +40,7 @@ export const StoryGame: Game<GameState> = {
     }
 
     // Gives  1000 units on each axis of hypothetical logical coordinates. Screen space is mapped onto these logical bounds
-    const logicalBounds: BoardBounds = { origin: { x: 0, y: 0 }, width: 1000, height: 1000 }
+    const logicalBounds: BoardBounds = { origin: { x: 0, y: 0 }, width: BOARD_DIMENSIONS_LOGICAL[0], height: BOARD_DIMENSIONS_LOGICAL[1] }
     return {
       nextCardID: nextCardID,
       sharedBoard: { id: createBoardID(0), placedCards: [], bounds: logicalBounds }, // Empty board. Shared board gets ID of 0
@@ -137,14 +138,26 @@ export const StoryGame: Game<GameState> = {
           xPos: number
         ) => {
           if (!playerID || !G.players[playerID]) return INVALID_MOVE
-          const foundCard = G.players[playerID].secretHand.cards.find((c) => c.instanceID === cardID)
-          if (!foundCard) return INVALID_MOVE // Check that the card is owned by the player. If not, do not let them pick up. DRAGSETTING
+          const found = G.sharedBoard.placedCards.find((c) => c.instanceID === cardID)
+
+          if (!found) return INVALID_MOVE
+          if (found.playerOwnerID !== playerID) return INVALID_MOVE
 
           const newInfo = cardBoardToHand(cardID, G.sharedBoard, xPos, G.players[playerID].secretHand)
           if (!newInfo) return INVALID_MOVE
-
+          //
+          // G.sharedBoard = newInfo.board
+          // G.players[playerID].secretHand = { ...newInfo.hand, playerID }
+          //
+          const sorted = [...newInfo.hand.cards].sort(
+            (a, b) => a.xPosition - b.xPosition
+          )
           G.sharedBoard = newInfo.board
-          G.players[playerID].secretHand = { ...newInfo.hand, playerID }
+          G.players[playerID].secretHand = {
+            playerID,
+            cards: sorted.map((c, xPos) => ({ ...c, xPosition: xPos }))
+          }
+
         },
 
         /**

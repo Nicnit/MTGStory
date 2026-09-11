@@ -1,6 +1,7 @@
 import { CardType } from '../model/card-types';
 import { LocalBoardPosition } from './board';
 import { getRandomCard } from '@/data/card-data';
+import { BOARD_DIMENSIONS_LOGICAL } from '@/game/Game';
 
 // For board-related operations or types see ./board.ts
 
@@ -104,10 +105,11 @@ export function drawCards(hand: Hand, numCards: number, startID: number, playerI
   let nextHand: Hand = { cards: [...hand.cards] }
   for (let i = 0; i < numCards; i++) {
     nextHand = addCardToHand({
+
       ...getRandomCard(),
       instanceID: makeCardInstanceID(startID++),
       playerOwnerID: playerID,
-      xPosition: 0 // sorts by utf or something
+      xPosition: nextHand.cards.length
     }, nextHand)
   }
 
@@ -116,6 +118,7 @@ export function drawCards(hand: Hand, numCards: number, startID: number, playerI
     nextID: startID
   })
 }
+
 
 /**
  * Removes a card from a hand by card ID

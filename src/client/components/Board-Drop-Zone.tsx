@@ -67,16 +67,21 @@ export default function BoardDropZone({ id, bounds, placedCards, activeCardData 
 function DraggableBoardCard({ id, name, image, activeCardData }: {
   id: string; name: string; image: string; activeCardData: UICard | null
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id })
-  let opacity = 1
-  if (activeCardData && id === activeCardData.instanceID) { opacity = 0 }
+  const { attributes, listeners, setNodeRef } = useDraggable({ id })
+  let hidden = false;
+  if (activeCardData && id === activeCardData.instanceID) { hidden = true }
+
   const style = {
-    transform: CSS.Translate.toString(transform),
-    opacity: opacity
+    // transform: CSS.Translate.toString(transform),
+    // opacity: opacity
+    opacity: hidden ? 0 : 1
   }
+
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <Card name={name} image={image} />
+      <div style={style}>
+        <Card name={name} image={image} />
+      </div>
     </div>
   )
 }
