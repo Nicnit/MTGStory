@@ -6,9 +6,6 @@ import { PlacedCardInstance, UICard } from '@/model/card';
 import Card from './Card';
 import { CSS } from '@dnd-kit/utilities';
 
-const isOverCol1: string = '#d0f0d0'
-const isOverCol2: string = '#f0f0f0'
-
 export default function BoardDropZone({ id, bounds, placedCards, activeCardData }: {
   id: string;
   bounds: BoardBounds;
@@ -44,8 +41,7 @@ export default function BoardDropZone({ id, bounds, placedCards, activeCardData 
   return (
     <div
       ref={mergeRefs([setNodeRef as React.Ref<HTMLDivElement>, refContainer])} // cast correctly
-      className="board-drop-zone"
-      style={{ position: 'relative', background: isOver ? isOverCol1 : isOverCol2 }}
+      className={isOver ? 'board-drop-zone is-over' : 'board-drop-zone'}
     >
       Drop Cards Here. width: {dimensions.width} |  height: {dimensions.height}
 
