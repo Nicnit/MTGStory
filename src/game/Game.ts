@@ -1,5 +1,5 @@
 import type { Game } from 'boardgame.io';
-import { CardInstance, drawCards, removeCardFromHand, SecretHand } from '@/model/card';
+import { CardInstance, drawCards, removeCardFromHand, addCardToHand, SecretHand } from '@/model/card';
 import { LocalBoardPosition, Board, moveCardInBoard, addCardToBoard, createBoardID } from '@/model/board';
 import { INVALID_MOVE } from 'boardgame.io/core'
 import { BoardBounds, Position2D } from '@/model/geometry';
@@ -175,8 +175,12 @@ export const StoryGame: Game<GameState> = {
           const foundCard = hand.cards.find((c) => c.instanceID === cardID)
           if (!foundCard) return INVALID_MOVE
 
+          // reorder position
           const newCard = { ...foundCard, xPosition }
-          G.players[playerID].secretHand = { ...removeCardFromHand(hand, cardID), playerID }
+          const without = removeCardFromHand(hand, cardID)
+          const inserted = addCardToHand(newCard, without)
+          const sorted = [...inserted.cards].sort((a, b) => a.xPosition - b.xPosition)
+          G.players[playerID].secretHand = { playerID, cards: sorted.map((c, xPosition) => ({ ...c, xPosition })) }
         }
 
       },

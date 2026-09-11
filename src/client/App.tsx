@@ -145,7 +145,8 @@ const GlobalBoard = ({ G, playerID, moves }: any) => {
             // doesn't move card due to permissions
           }
         } else if (source === 'hand') {
-          // do nothing, reorder?
+          moves.moveCardInHand(cardInfo.id as string, xPos)
+          wroteToG = true
         }
       }
     }
