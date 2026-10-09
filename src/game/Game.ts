@@ -53,7 +53,7 @@ export const StoryGame: Game<GameState> = {
     upkeep: {
       start: false, // Set to true once done developing Main
       turn: {
-        activePlayers: { all: 'ANY' }, // TODO change ANY to make specific players active
+        activePlayers: { all: 'ANY' }, // small_TODO change ANY to make specific players active
       },
       // endIf condition is met
       moves: {
@@ -119,9 +119,8 @@ export const StoryGame: Game<GameState> = {
           cardID: string,
           pos: LocalBoardPosition
         ) => {
-          // TODO list:
           // check new position is in boudns and valid
-          // check active player has permission to move the cards
+          // check active player has permission to move the cards ?
           const newBoard: Board | null = moveCardInBoard(cardID, G.sharedBoard, pos)
           if (newBoard === null) return INVALID_MOVE
           G.sharedBoard = newBoard
@@ -188,6 +187,6 @@ export const StoryGame: Game<GameState> = {
   },
   turn: {
     minMoves: 1,
-    maxMoves: 10, // TODO configure correctly. 
+    maxMoves: 10, // small_TODO configure correctly. 
   },
 }

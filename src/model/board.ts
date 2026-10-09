@@ -93,13 +93,13 @@ export function createBoardID(IDnumber: number) {
 }
 
 /**
- * Create match id. notably, no way to track match IDs yet TODO
+ * Create match id. notably, no way to track match IDs yet small_TODO
  */
 export function createMatchID(IDnumber: number) {
   return MATCH_ID_PREPEND + IDnumber.toString();
 }
 /**
- * Create match id. notably, no way to track match IDs yet TODO
+ * Create match id. notably, no way to track match IDs yet small_TODO
  */
 export function createPlayerID(IDnumber: number) {
   return PLAYER_ID_PREPEND + IDnumber.toString();

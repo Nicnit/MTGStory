@@ -31,8 +31,6 @@ function Hand({ cards, activeCardData }: {
     }
   };
 
-  // TODO make cards in hand reorderable by dragging.
-
   return (
     <SortableContext
       items={cards.map((c) => c.instanceID)}
